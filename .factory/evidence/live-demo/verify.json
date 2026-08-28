@@ -1,0 +1,14 @@
+{
+  "url": "https://audio-graph-sketchpad.sociobot.in/?demo=1",
+  "loadMs": 788,
+  "errors": [],
+  "a11y": {
+    "title": "Demo — Patchboard",
+    "lang": "en",
+    "h1": 1,
+    "main": true,
+    "imgsMissingAlt": 0,
+    "buttonsUnlabeled": 0,
+    "textLength": 2114
+  }
+}

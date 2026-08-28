@@ -1,22 +1,44 @@
-# Review 1 handoff — FAIL
+# Patchboard polish round 1 handoff
 
-Adversarial first-read review 1 is complete for candidate `395c48bdfb261ff11baada6cb7e29288629842f5` and the live site at <https://audio-graph-sketchpad.sociobot.in>.
+## Outcome
 
-## What was done
+All findings F-1-1 through F-1-43 are resolved. Patchboard remains a static Vite + TypeScript site with its dark pixel-workbench identity.
 
-- Wrote `.factory/review-1.md` with the cold 390 px and desktop assessment, full landing/README copy audit, demo and storage-isolation evidence, claims cross-check, earlier-finding regression checks, route/metadata/accessibility review, missed-leverage analysis, and ordered findings.
-- Reviewed `.factory/brief.json`, `.factory/design.md`, the prior handoff, and both independent verification reports. No earlier `review-*.md` or `polish-*.md` files exist.
-- Did not modify product code.
+The release adds a clear first screen, memory-only sample mode, complete claim registry, working code export, shared route shell, route metadata/focus, legal pages, XML sitemap, and a real styled 404.
 
-## Verification
+Live site: <https://audio-graph-sketchpad.sociobot.in>
 
-- Clean-clone `npm ci`: pass, 0 vulnerabilities.
-- Clean-clone `npm test`: pass, 5 unit and 10 Playwright checks.
-- Clean-clone `npm run build`: pass; `dist/` produced.
-- Factory live URL verifier: pass, no console errors.
-- Playwright axe on `/`, `/demo`, `/privacy`, `/terms`, and an unknown route: zero serious/critical violations.
-- Live same-origin request capture, offline reload, skip-link focus, corrupt-fragment recovery, route crawl, and demo storage-sentinel checks were run.
+Demo: <https://audio-graph-sketchpad.sociobot.in/?demo=1>
 
-## Remaining work
+## Verification evidence
 
-Verdict is **FAIL** with four blocking findings: the first screen does not identify the audience or one first action; there is no isolated one-click demo; `.factory/claims.json` and claim-tagged tests are absent; and unknown routes render the product as HTTP 200 instead of a designed 404. The report also records every unlisted claim and all copy, metadata, navigation, shared-chrome, and missed-export findings. See `.factory/review-1.md` for exact quotes and fixes.
+- Clean clone: `/tmp/patchboard-polish-BUkZ7s` from commit `7ab7234`.
+- `npm ci`: passed, 0 vulnerabilities.
+- `npm test`: passed; 9 unit/structure checks and 31 browser checks, with 17 intentional duplicate-project skips.
+- `npm run build`: passed; `dist/` contains root, demo, privacy, terms, 404, sitemap, worker, and static config.
+- Build payload: JavaScript 34.52 KB raw / 11.87 KB gzip; CSS 15.53 KB raw / 4.27 KB gzip.
+- Every command in `.factory/claims.json`: passed individually from the clean clone, 16/16.
+- Local Lighthouse 12.8.2 mobile: performance 100, accessibility 100, best practices 100, SEO 100; LCP 1.5 s, CLS 0, TBT 0 ms.
+- Local Lighthouse desktop: all four category scores 100; LCP 0.4 s, CLS 0, TBT 0 ms.
+- Factory `verify-url.sh` on live `/` and `/?demo=1`: HTTP 200, one H1, main present, no missing alt, no unlabeled button, no console errors.
+- Live `npm run verify:live`: five routes checked, unknown route HTTP 404, zero serious/critical axe findings, zero unexpected console errors, zero external requests, no 390 px overflow, offline reload passed.
+- Live `npm run test:claims`: 16 passed.
+- Live `npm run test:e2e`: 31 passed with 17 intentional duplicate-project skips.
+- Deployment ID: `1013a74e-5afc-4c95-b649-da8a3bbc09db` on Azure Static Web Apps.
+
+Evidence paths: `.factory/evidence/lighthouse-summary.json`, `.factory/evidence/live-root/`, `.factory/evidence/live-demo/`, and `.factory/evidence/live-cold/`.
+
+## Run locally
+
+```sh
+npm ci
+npm test
+npm run build
+npm run preview
+```
+
+Run all claims with `npm run test:claims`. Run the deployed cold audit with `npm run verify:live`.
+
+## Known gaps and next steps
+
+None for the reviewed scope. The product remains intentionally limited to six synthesized modules and does not request microphone access.

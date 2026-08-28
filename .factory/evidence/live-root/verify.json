@@ -1,0 +1,14 @@
+{
+  "url": "https://audio-graph-sketchpad.sociobot.in",
+  "loadMs": 758,
+  "errors": [],
+  "a11y": {
+    "title": "Patchboard — hear a Web Audio graph",
+    "lang": "en",
+    "h1": 1,
+    "main": true,
+    "imgsMissingAlt": 0,
+    "buttonsUnlabeled": 0,
+    "textLength": 2049
+  }
+}
