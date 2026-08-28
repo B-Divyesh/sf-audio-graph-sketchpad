@@ -258,6 +258,7 @@ function startApp(): void {
       button.style.setProperty('--y', String(POSITIONS[definition.id].y));
       button.style.setProperty('--mx', String(MOBILE_POSITIONS[definition.id].x));
       button.style.setProperty('--my', String(MOBILE_POSITIONS[definition.id].y));
+      button.setAttribute('aria-label', `${definition.name} ${definition.kind}`);
       button.innerHTML = `<span class="module-glyph" aria-hidden="true">${definition.glyph}</span><span class="module-copy"><span class="module-name">${definition.name}</span><span class="module-kind">${definition.kind}</span></span>`;
       button.addEventListener('click', () => handleModule(definition.id));
       return button;
