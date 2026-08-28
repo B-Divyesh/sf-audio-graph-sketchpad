@@ -36,7 +36,7 @@ Generated app JS is 27,693 bytes raw / 9,942 bytes gzip; CSS is 11,783 bytes raw
 
 Lighthouse CLI was attempted against the same preview with the installed Playwright Chromium, but Lighthouse 13.4.1 terminated its Chromium target during artifact collection (`TargetCloseError`) and emitted no report. The existing Playwright axe integration passed serious/critical checks, and the preview semantic/console smoke passed. This is a tooling limitation, not a product release gap.
 
-Deploy with `npm run build`, publish `dist/` through the configured Azure Static Web Apps deployment on `main`, then confirm the live `sw.js` contains the generated `/assets/index-*.js` and `/assets/index-*.css` shell entries and repeat the offline reload smoke test.
+Deployment status: repair commit `2915450a0a088cac987fea408ce0f905d8a7bf96` was pushed to `origin/main`. `swa deploy --output-location dist --env production --dry-run --no-use-keychain` correctly selected `dist/` and `public/staticwebapp.config.json`, but production publishing requires a deployment token that is not available in this worker. At handoff, the live URL still served `patchboard-shell-v1` and the prior HTML hash. The configured `main` deployment must propagate (or an authorized worker must run the same deploy with its token), then live `sw.js` must contain the generated `/assets/index-*.js` and `/assets/index-*.css` entries and the offline reload smoke must be repeated.
 
 ## Archived pre-repair verifier result
 
