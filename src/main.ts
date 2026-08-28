@@ -45,7 +45,7 @@ function siteHeader(): string {
 }
 
 function siteFooter(): string {
-  return `<footer class="site-footer"><p>Build and hear small Web Audio graphs in your browser.</p><nav class="footer-links" aria-label="Footer navigation"><a href="/privacy" data-route>Privacy</a><a href="/terms" data-route>Terms</a><a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API" rel="noreferrer">Web Audio reference (external)</a></nav><p>Built by Param Factory · ${BUILD_ID}</p></footer>`;
+  return `<footer class="site-footer"><p>Build and hear small Web Audio graphs in your browser. Original AI-generated pixel artwork.</p><nav class="footer-links" aria-label="Footer navigation"><a href="/privacy" data-route>Privacy</a><a href="/terms" data-route>Terms</a><a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API" rel="noreferrer">Web Audio reference (external)</a></nav><p>Built by Param Factory · ${BUILD_ID}</p></footer>`;
 }
 
 function renderLegal(route: '/privacy' | '/terms'): void {

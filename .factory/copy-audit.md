@@ -34,6 +34,7 @@ The headline names the job, the next sentence names the audience, and the cyan s
 | 14 | Patchboard needs no account, upload, sample library, or microphone. It has no tracks or cloud projects. |
 | 13 | Normal patches use this browser’s local storage. Demo changes stay only in the open tab. |
 | 9 | Build and hear small Web Audio graphs in your browser. |
+| 4 | Original AI-generated pixel artwork. |
 
 Short labels, control values, status messages, legal copy, and dialog instructions were also checked. Their longest sentence is 20 words.
 
