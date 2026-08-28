@@ -23,7 +23,7 @@ The researched brief, six-node native Web Audio workflow, local storage/session 
 npm ci                                  PASS (0 vulnerabilities)
 npx tsc --noEmit                        PASS
 npm run lint --if-present               PASS (no separate lint script is configured)
-npm test                                 PASS — 5 Vitest assertions; 10 Playwright checks
+npm test                                 PASS — 5 Vitest tests; 10 Playwright checks
 npm run build                           PASS — dist/ generated
 npm audit --audit-level=moderate        PASS (0 vulnerabilities)
 ```
