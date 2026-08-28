@@ -44,6 +44,18 @@ export function makeDefaultSession(): Session {
   };
 }
 
+export function makeDemoSession(): Session {
+  const session = makeDefaultSession();
+  session.variants.A.name = 'Neon steps';
+  session.variants.B.name = 'Neon steps — bright echo';
+  session.variants.B.params.filter.cutoff = 2600;
+  session.variants.B.params.filter.resonance = 7.5;
+  session.variants.B.params.delay.time = 0.36;
+  session.variants.B.params.delay.feedback = 0.42;
+  session.variants.B.connections.push({ from: 'noise', to: 'filter' });
+  return session;
+}
+
 export function hasPath(connections: Connection[], start: NodeId, goal: NodeId): boolean {
   const seen = new Set<NodeId>();
   const visit = (node: NodeId): boolean => {

@@ -45,6 +45,8 @@ Signal packets move left-to-right along connected SVG cables only while audio is
 
 The sole raster illustration is `public/art/patch-spirit.webp`, used in the welcome/empty guidance panel and social preview. It depicts a tiny abstract circuit creature routing a luminous pulse through six modules. It clarifies the product metaphor without pretending to be a screenshot. UI icons and the logomark are hand-authored geometric SVG/CSS shapes in the repository.
 
+`public/art/patchboard-social.png` is a 1200 × 630 composition derived from that original source on the Void background. `public/apple-touch-icon.png` is a square crop of the same original art. Both were produced locally with ImageMagick on 2026-08-28; no new third-party asset was introduced.
+
 Prompt sheet:
 
 > Use case: stylized-concept. Asset type: compact website welcome illustration. A tiny abstract audio circuit creature made from six chunky electronic modules routes one luminous square pulse through patch cables inside a dark midnight workbench. Authentic 16-bit demoscene pixel art, hard-edged pixel clusters, limited palette of near-black, oxidized blue, phosphor cyan, and warm amber, subtle CRT bloom but no blur. Isometric three-quarter composition centered with generous dark negative space, playful and technically precise. No people, no instruments, no UI screenshot, no readable text, no letters, no watermark, no logo, no gradients, no brands.

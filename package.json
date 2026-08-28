@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "test": "npm run test:unit && npm run test:e2e",
     "test:unit": "vitest run tests/unit",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:claims": "playwright test tests/e2e/claims.spec.ts --project=chromium"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.10.2",

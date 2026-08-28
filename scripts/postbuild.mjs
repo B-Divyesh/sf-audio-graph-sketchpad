@@ -1,10 +1,11 @@
 import { cp, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 
-for (const route of ['privacy', 'terms']) {
+for (const route of ['demo', 'privacy', 'terms']) {
   await mkdir(new URL(`../dist/${route}/`, import.meta.url), { recursive: true });
   await cp(new URL('../dist/index.html', import.meta.url), new URL(`../dist/${route}/index.html`, import.meta.url));
 }
+await cp(new URL('../dist/index.html', import.meta.url), new URL('../dist/404.html', import.meta.url));
 
 // Vite fingerprints application entrypoints on every build. Generate the
 // worker only after the emitted entrypoints are known, so an offline reload
@@ -14,10 +15,14 @@ const html = await readFile(new URL('index.html', dist), 'utf8');
 const generatedAssets = [...html.matchAll(/(?:src|href)="(\/assets\/[^"?]+)"/g)].map((match) => match[1]);
 const shell = [...new Set([
   '/',
+  '/demo/',
   '/privacy/',
   '/terms/',
+  '/?demo=1',
   ...generatedAssets,
   '/art/patch-spirit.webp',
+  '/art/patchboard-social.png',
+  '/apple-touch-icon.png',
   '/icon.svg',
   '/manifest.webmanifest',
 ])];

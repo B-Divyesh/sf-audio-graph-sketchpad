@@ -7,6 +7,7 @@ import {
   isValidSession,
   makeDefaultPatch,
   makeDefaultSession,
+  makeDemoSession,
   SHARE_SESSION_ERROR,
 } from '../../src/patch';
 
@@ -44,5 +45,14 @@ describe('share codec', () => {
     session.variants.A.params.delay.feedback = 4;
     expect(isValidSession(session)).toBe(false);
     expect(() => decodeSession('not-json')).toThrow(SHARE_SESSION_ERROR);
+  });
+});
+
+describe('demo fixture', () => {
+  it('keeps meaningful distinct A and B sample variants', () => {
+    const demo = makeDemoSession();
+    expect(demo.variants.A.name).toBe('Neon steps');
+    expect(demo.variants.B.params.filter.cutoff).not.toBe(demo.variants.A.params.filter.cutoff);
+    expect(demo.variants.B.connections).not.toEqual(demo.variants.A.connections);
   });
 });

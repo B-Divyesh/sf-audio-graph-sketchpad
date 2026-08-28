@@ -131,6 +131,9 @@ export class AudioEngine {
       ['gain', { input: gain, output: gain }],
       ['speaker', { input: speaker, output: null }],
     ]);
+    window.dispatchEvent(new CustomEvent('patchboard:graph-built', {
+      detail: { filterClass: filter.constructor.name, filterType: filter.type },
+    }));
     this.update(patch);
     this.reconnect(patch);
   }
@@ -146,6 +149,9 @@ export class AudioEngine {
       this.pulse(this.oscGate?.gain, time, length, oscLevel);
       this.pulse(this.noiseGate?.gain, time, Math.min(length, 0.075), 0.7);
       const beatNumber = this.beat;
+      window.dispatchEvent(new CustomEvent('patchboard:beat-scheduled', {
+        detail: { beat: beatNumber, audioTime: time, currentAudioTime: context.currentTime },
+      }));
       const wait = Math.max(0, (time - context.currentTime) * 1000);
       window.setTimeout(() => this.onBeat(beatNumber), wait);
       this.beat = (this.beat + 1) % 16;
