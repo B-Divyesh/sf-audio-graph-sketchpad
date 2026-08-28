@@ -24,7 +24,7 @@ Demo: <https://audio-graph-sketchpad.sociobot.in/?demo=1>
 - Live `npm run verify:live`: five routes checked, unknown route HTTP 404, zero serious/critical axe findings, zero unexpected console errors, zero external requests, no 390 px overflow, offline reload passed.
 - Live `npm run test:claims`: 16 passed.
 - Live `npm run test:e2e`: 31 passed with 17 intentional duplicate-project skips.
-- Deployment ID: `1013a74e-5afc-4c95-b649-da8a3bbc09db` on Azure Static Web Apps.
+- Final deployment ID: `40824312-c3b9-4720-ba14-ac7c38f4ef0f` on Azure Static Web Apps.
 
 Evidence paths: `.factory/evidence/lighthouse-summary.json`, `.factory/evidence/live-root/`, `.factory/evidence/live-demo/`, and `.factory/evidence/live-cold/`.
 
