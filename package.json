@@ -1,0 +1,21 @@
+{
+  "name": "audio-graph-sketchpad",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build && node scripts/postbuild.mjs",
+    "preview": "vite preview",
+    "test": "npm run test:unit && npm run test:e2e",
+    "test:unit": "vitest run tests/unit",
+    "test:e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.10.2",
+    "@playwright/test": "1.58.2",
+    "typescript": "5.8.3",
+    "vite": "6.4.3",
+    "vitest": "3.2.7"
+  }
+}

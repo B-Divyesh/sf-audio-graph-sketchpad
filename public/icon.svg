@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Patchboard">
+  <rect width="64" height="64" fill="#090c10"/>
+  <path d="M8 18h15v10h18V17h15M8 46h15V36h18v11h15" fill="none" stroke="#5fffe1" stroke-width="5"/>
+  <rect x="3" y="13" width="10" height="10" fill="#ffc857"/>
+  <rect x="51" y="12" width="10" height="10" fill="#ffc857"/>
+  <rect x="3" y="41" width="10" height="10" fill="#ffc857"/>
+  <rect x="51" y="42" width="10" height="10" fill="#ffc857"/>
+  <rect x="27" y="25" width="10" height="14" fill="#17242d" stroke="#f0f7f4" stroke-width="3"/>
+</svg>

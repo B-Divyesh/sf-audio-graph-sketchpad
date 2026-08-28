@@ -13,7 +13,7 @@ Clarity wins over nostalgia. Controls use real words, every cable carries a sour
 | Void | `#090c10` | page background |
 | Panel | `#101820` | primary work surface |
 | Raised | `#17242d` | controls and inspector |
-| Grid | `#293b45` | borders and dormant cables |
+| Grid | `#3b525e` | borders and dormant cables |
 | Paper | `#f0f7f4` | primary copy (18.1:1 on Void) |
 | Muted | `#a9bbc0` | secondary copy (9.5:1 on Void) |
 | Signal | `#5fffe1` | live graph, focus, success |
@@ -50,4 +50,3 @@ Prompt sheet:
 > Use case: stylized-concept. Asset type: compact website welcome illustration. A tiny abstract audio circuit creature made from six chunky electronic modules routes one luminous square pulse through patch cables inside a dark midnight workbench. Authentic 16-bit demoscene pixel art, hard-edged pixel clusters, limited palette of near-black, oxidized blue, phosphor cyan, and warm amber, subtle CRT bloom but no blur. Isometric three-quarter composition centered with generous dark negative space, playful and technically precise. No people, no instruments, no UI screenshot, no readable text, no letters, no watermark, no logo, no gradients, no brands.
 
 Generated with the Factory Azure image deployment through `/opt/fleet/lib/gen-image.sh` on 2026-08-28. The output is original project artwork. Source PNG and prompt sidecar live in `assets/src/`; the optimized WebP ships in `public/art/`.
-
