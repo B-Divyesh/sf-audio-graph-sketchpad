@@ -1,4 +1,16 @@
-# Patchboard v1 handoff
+# Patchboard v1 handoff — verification status: FAIL
+
+## Independent verification disposition (2026-08-28 UTC)
+
+Candidate `8385ba086c97976e3e3d84bdf831648c9e46302b` was independently tested against <https://audio-graph-sketchpad.sociobot.in>. **FAIL — do not release as passing.** The deployment exactly matches the candidate and its online workflows, tests, typecheck, production build, privacy policies, bundle budgets, mobile layout, keyboard operation, reduced motion, axe serious/critical scan, and Lighthouse measurement pass. The PWA promise does not: after a normal online visit, offline reload serves an empty app because the service worker precaches HTML but omits the Vite-hashed JS and CSS. See `.factory/verification.md` for exact reproduction and evidence.
+
+Required corrective work before release:
+
+1. P1: precache/version the full generated app shell and prove offline reload renders a usable patchboard after first online visit.
+2. P2: make the `#main` skip target focusable so keyboard focus lands in main.
+3. P2: replace raw malformed-share parser errors with recovery guidance.
+
+## Original builder handoff (superseded as a release decision)
 
 ## What shipped
 
