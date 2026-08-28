@@ -1,0 +1,9 @@
+{
+  "asset": "patch-spirit.png",
+  "generator": "/opt/fleet/lib/gen-image.sh (Factory Azure image deployment)",
+  "generated": "2026-08-28",
+  "size": "1536x1024",
+  "quality": "high",
+  "prompt": "Use case: stylized-concept. Asset type: compact website welcome illustration. A tiny abstract audio circuit creature made from six chunky electronic modules routes one luminous square pulse through patch cables inside a dark midnight workbench. Authentic 16-bit demoscene pixel art, hard-edged pixel clusters, limited palette of near-black, oxidized blue, phosphor cyan, and warm amber, subtle CRT bloom but no blur. Isometric three-quarter composition centered with generous dark negative space, playful and technically precise. No people, no instruments, no UI screenshot, no readable text, no letters, no watermark, no logo, no gradients, no brands.",
+  "review": "Accepted: six-module circuit subject, coherent limited palette, no people, readable text, marks, logos, or brands detected."
+}

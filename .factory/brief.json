@@ -1,0 +1,9 @@
+{
+  "slug": "audio-graph-sketchpad",
+  "title": "Patchboard",
+  "territory": "games-creative",
+  "user": "Creative coders learning Web Audio who need to hear and inspect a small signal graph before embedding it in a performance or toy.",
+  "smallest_useful_product": "Static web patchboard with six native nodes, animated signal path, BPM scheduler, click-to-hear A/B changes, and shareable URL fragment.",
+  "monetization": "free",
+  "constraints": "Use only synthesized sound; reduce-motion option; autoplay requires a user gesture; no microphone permission in v1."
+}
