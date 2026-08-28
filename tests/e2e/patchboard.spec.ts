@@ -47,3 +47,41 @@ test('fits a 390px viewport and exposes legal pages', async ({ page }) => {
   await page.goto('/terms/');
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Terms, in plain language.');
 });
+
+test('offline reload uses the generated app shell after an online visit', async ({ page, context }) => {
+  await page.goto('/');
+  await page.waitForFunction(() => navigator.serviceWorker.controller !== null);
+
+  const cachedUrls = await page.evaluate(async () => {
+    const cacheNames = await caches.keys();
+    const requests = await Promise.all(cacheNames.map(async (cacheName) => (await caches.open(cacheName)).keys()));
+    return requests.flat().map((request) => new URL(request.url).pathname);
+  });
+  expect(cachedUrls).toContain('/');
+  expect(cachedUrls).toContainEqual(expect.stringMatching(/^\/assets\/index-.*\.js$/));
+  expect(cachedUrls).toContainEqual(expect.stringMatching(/^\/assets\/index-.*\.css$/));
+
+  await context.setOffline(true);
+  try {
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await expect(page.getByRole('heading', { name: 'Signal graph' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Start audio' })).toBeEnabled();
+  } finally {
+    await context.setOffline(false);
+  }
+});
+
+test('skip link moves keyboard focus to the main landmark', async ({ page }) => {
+  await page.goto('/');
+  await page.keyboard.press('Tab');
+  await expect(page.getByRole('link', { name: 'Skip to patchboard' })).toBeFocused();
+  await page.keyboard.press('Enter');
+  await expect(page.locator('main')).toBeFocused();
+});
+
+test('a corrupt share link gives recovery guidance without parser details', async ({ page }) => {
+  await page.goto('/#patch=not-json');
+  await expect(page.locator('#status-line')).toHaveText(/compatible Patchboard session\. A fresh patch is ready to edit and share\./);
+  await expect(page.locator('#status-line')).not.toContainText('Unexpected token');
+  await expect(page.getByRole('button', { name: 'Start audio' })).toBeEnabled();
+});

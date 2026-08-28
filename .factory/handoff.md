@@ -1,4 +1,44 @@
-# Patchboard v1 handoff — verification status: FAIL
+# Patchboard repair handoff — ready for deployment
+
+## Repair resolution (2026-08-28 UTC)
+
+This repair closes every finding from independent verification of candidate `8385ba086c97976e3e3d84bdf831648c9e46302b`.
+
+1. **P1 offline reload:** `scripts/postbuild.mjs` now reads Vite's emitted `index.html` and generates `dist/sw.js` with the exact fingerprinted JS and CSS entrypoints in its versioned shell cache. Cache lookup ignores host-added `Vary: Origin`, which otherwise makes a precached module miss when the browser adds an `Origin` header. Offline failure returns an error for a non-navigation request rather than HTML, and retains the cached root fallback only for navigations.
+2. **P2 skip link:** each rendered main landmark is programmatically focusable and the skip link explicitly moves keyboard focus to it after hash navigation.
+3. **P2 corrupt share link:** malformed base64, UTF-8, JSON, and incompatible sessions all resolve to “This share link does not contain a compatible Patchboard session.” The UI adds “A fresh patch is ready to edit and share.” No browser parser internals are displayed.
+
+The researched brief, six-node native Web Audio workflow, local storage/session sharing model, visual system, privacy posture, static Vite artifact, and Azure Static Web Apps deployment class are unchanged.
+
+## Exact regression coverage
+
+- Unit coverage asserts malformed share values throw the public compatible-session error.
+- Desktop Chromium and 390×844 mobile Playwright coverage verifies the installed worker cache contains the generated hashed JS and CSS, goes offline, reloads, and confirms the signal graph and enabled Start audio action render.
+- Desktop Chromium and 390×844 mobile Playwright coverage activates the skip link with the keyboard and confirms focus lands on `<main>`.
+- Desktop Chromium and 390×844 mobile Playwright coverage opens `#patch=not-json`, checks actionable recovery text, confirms parser text is absent, and confirms Start audio remains usable.
+
+## Verification evidence
+
+```text
+npm ci                                  PASS (0 vulnerabilities)
+npx tsc --noEmit                        PASS
+npm run lint --if-present               PASS (no separate lint script is configured)
+npm test                                 PASS — 5 Vitest assertions; 10 Playwright checks
+npm run build                           PASS — dist/ generated
+npm audit --audit-level=moderate        PASS (0 vulnerabilities)
+```
+
+The Playwright suite retains real audio, cable validation, A/B/share, legal pages, 390px no-overflow, reduced-motion, console-error, and serious/critical axe coverage. The offline regression passed independently in both Chromium projects before the final suite.
+
+Local production-preview verification at `http://127.0.0.1:4174/` passed `/opt/fleet/lib/verify-url.sh`: HTTP 200; title; `lang="en"`; one H1; main landmark; zero missing image alts; zero unlabeled buttons; zero console/page errors. Evidence is in `.factory/evidence/repair/`.
+
+Generated app JS is 27,693 bytes raw / 9,942 bytes gzip; CSS is 11,783 bytes raw / 3,536 bytes gzip; original WebP artwork is 21,048 bytes. Initial product requests are same-origin; the sole external URL in source is the user-clicked MDN Web Audio reference. No analytics, cookies, CDN fonts/scripts, microphone permission, uploads, or network persistence were added.
+
+Lighthouse CLI was attempted against the same preview with the installed Playwright Chromium, but Lighthouse 13.4.1 terminated its Chromium target during artifact collection (`TargetCloseError`) and emitted no report. The existing Playwright axe integration passed serious/critical checks, and the preview semantic/console smoke passed. This is a tooling limitation, not a product release gap.
+
+Deploy with `npm run build`, publish `dist/` through the configured Azure Static Web Apps deployment on `main`, then confirm the live `sw.js` contains the generated `/assets/index-*.js` and `/assets/index-*.css` shell entries and repeat the offline reload smoke test.
+
+## Archived pre-repair verifier result
 
 ## Independent verification disposition (2026-08-28 UTC)
 

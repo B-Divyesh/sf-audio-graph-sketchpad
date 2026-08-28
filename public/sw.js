@@ -1,4 +1,5 @@
-const CACHE = 'patchboard-shell-v1';
+/* This template is overwritten in dist/ by scripts/postbuild.mjs. */
+const CACHE = 'patchboard-shell-template';
 const SHELL = ['/', '/privacy/', '/terms/', '/art/patch-spirit.webp', '/icon.svg', '/manifest.webmanifest'];
 
 self.addEventListener('install', (event) => {
@@ -12,12 +13,12 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   event.respondWith(
-    caches.match(event.request).then((cached) => cached || fetch(event.request).then((response) => {
+    caches.match(event.request, { ignoreVary: true }).then((cached) => cached || fetch(event.request).then((response) => {
       if (response.ok && new URL(event.request.url).origin === self.location.origin) {
         const copy = response.clone();
         caches.open(CACHE).then((cache) => cache.put(event.request, copy));
       }
       return response;
-    }).catch(() => caches.match('/'))),
+    }).catch(() => event.request.mode === 'navigate' ? caches.match('/') : Response.error())),
   );
 });

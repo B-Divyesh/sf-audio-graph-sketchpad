@@ -7,6 +7,7 @@ import {
   isValidSession,
   makeDefaultPatch,
   makeDefaultSession,
+  SHARE_SESSION_ERROR,
 } from '../../src/patch';
 
 describe('graph rules', () => {
@@ -42,6 +43,6 @@ describe('share codec', () => {
     const session = makeDefaultSession();
     session.variants.A.params.delay.feedback = 4;
     expect(isValidSession(session)).toBe(false);
-    expect(() => decodeSession('not-json')).toThrow();
+    expect(() => decodeSession('not-json')).toThrow(SHARE_SESSION_ERROR);
   });
 });

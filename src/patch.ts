@@ -10,6 +10,7 @@ export const NODE_DEFINITIONS: NodeDefinition[] = [
 ];
 
 export const NODE_IDS = NODE_DEFINITIONS.map((node) => node.id);
+export const SHARE_SESSION_ERROR = 'This share link does not contain a compatible Patchboard session.';
 
 export function makeDefaultPatch(): Patch {
   return {
@@ -112,10 +113,16 @@ export function encodeSession(session: Session): string {
 }
 
 export function decodeSession(value: string): Session {
-  const base64 = value.replace(/-/g, '+').replace(/_/g, '/');
-  const binary = atob(base64);
-  const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
-  const parsed: unknown = JSON.parse(new TextDecoder().decode(bytes));
-  if (!isValidSession(parsed)) throw new Error('This share link does not contain a compatible Patchboard session.');
-  return parsed;
+  try {
+    const base64 = value.replace(/-/g, '+').replace(/_/g, '/');
+    const binary = atob(base64);
+    const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+    const parsed: unknown = JSON.parse(new TextDecoder().decode(bytes));
+    if (!isValidSession(parsed)) throw new Error(SHARE_SESSION_ERROR);
+    return parsed;
+  } catch {
+    // URL fragments are user-controlled. Never expose browser codec/parser
+    // implementation details in the product's recovery path.
+    throw new Error(SHARE_SESSION_ERROR);
+  }
 }

@@ -20,11 +20,11 @@ npm run build
 npm run preview
 ```
 
-The production command is exactly `npm run build`; deploy the generated `dist/` directory. Unit tests cover graph and share encoding rules. Playwright runs desktop and 390px mobile workflows plus an axe accessibility scan.
+The production command is exactly `npm run build`; deploy the generated `dist/` directory. Unit tests cover graph and share encoding rules. Playwright runs desktop and 390px mobile workflows, keyboard recovery paths, an actual offline reload after service-worker installation, and an axe accessibility scan.
 
 ## Privacy and offline behavior
 
-Patch data is saved only in browser local storage. Share links encode data after `#`, which browsers do not send to the server. A service worker caches the app shell after the first visit. See `/privacy` and `/terms` in the built app.
+Patch data is saved only in browser local storage. Share links encode data after `#`, which browsers do not send to the server. After one successful online visit, a service worker caches the generated app shell—including the fingerprinted JavaScript and CSS—so an offline reload remains usable. See `/privacy` and `/terms` in the built app.
 
 The product brief lives in `.factory/brief.json`; the original visual system and generated-art provenance live in `.factory/design.md` and `assets/src/`.
 

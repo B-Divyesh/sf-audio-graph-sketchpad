@@ -7,6 +7,7 @@ import {
   encodeSession,
   isValidSession,
   makeDefaultSession,
+  SHARE_SESSION_ERROR,
 } from './patch';
 import type { NodeId, Patch, Session } from './types';
 
@@ -42,7 +43,7 @@ function renderLegal(path: string): void {
   const privacy = path === '/privacy';
   document.title = `${privacy ? 'Privacy' : 'Terms'} — Patchboard`;
   app.innerHTML = `
-    <main id="main" class="legal-page">
+    <main id="main" class="legal-page" tabindex="-1">
       <p class="brand-kicker">Patchboard / ${privacy ? 'privacy' : 'terms'}</p>
       <h1>${privacy ? 'Your patches stay yours.' : 'Terms, in plain language.'}</h1>
       ${privacy ? `
@@ -76,8 +77,8 @@ function startApp(): void {
       session = decodeSession(shared);
       loadMessage = `Shared patch “${session.variants[session.active].name}” loaded. Press Start audio to hear it.`;
       loadKind = 'success';
-    } catch (error) {
-      loadMessage = error instanceof Error ? error.message : 'The shared patch could not be read.';
+    } catch {
+      loadMessage = `${SHARE_SESSION_ERROR} A fresh patch is ready to edit and share.`;
       loadKind = 'error';
     }
   } else {
@@ -117,7 +118,7 @@ function startApp(): void {
       </div>
     </header>
     <div id="network-banner" class="network-banner" role="status">You’re offline. The synth and saved patches still work.</div>
-    <main id="main">
+    <main id="main" tabindex="-1">
       <section class="intro-strip" aria-labelledby="intro-heading">
         <div class="intro-copy">
           <p class="eyebrow">A tiny audible notebook</p>
@@ -653,3 +654,10 @@ function startApp(): void {
     });
   }
 }
+
+// Hash navigation alone does not consistently move focus across browsers.
+// Keep the visible skip link's native target behavior and explicitly place
+// keyboard/screen-reader focus on the newly rendered main landmark.
+document.querySelector<HTMLAnchorElement>('.skip-link')?.addEventListener('click', () => {
+  requestAnimationFrame(() => document.getElementById('main')?.focus());
+});
