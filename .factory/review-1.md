@@ -1,8 +1,11 @@
 # Adversarial first-read review 1 — Patchboard
 
-**Verdict: FAIL**  
-**Reviewed:** 28 August 2026 UTC  
-**Live URL:** <https://audio-graph-sketchpad.sociobot.in>  
+**Verdict: FAIL**
+
+**Reviewed:** 28 August 2026 UTC
+
+**Live URL:** <https://audio-graph-sketchpad.sociobot.in>
+
 **Candidate:** `395c48bdfb261ff11baada6cb7e29288629842f5`
 
 Patchboard has a working, distinctive audio editor, but it does not meet the first-read, demo, claims, or routing contracts. Four findings are blocking. There are also unlisted claims, incomplete site structure, and copy defects. A PASS requires zero findings and no untested claim.
