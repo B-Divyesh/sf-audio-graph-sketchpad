@@ -2,6 +2,15 @@ import type { NodeId, Patch } from './types';
 
 type NodePort = { input: AudioNode | null; output: AudioNode | null };
 
+export type OutputMeasurement = {
+  connectionRevision: number;
+  startAudioTime: number;
+  endAudioTime: number;
+  rms: number;
+  peak: number;
+  sampledFrames: number;
+};
+
 export class AudioEngine {
   private context: AudioContext | null = null;
   private ports = new Map<NodeId, NodePort>();
@@ -12,6 +21,10 @@ export class AudioEngine {
   private noiseLevel: GainNode | null = null;
   private delayFeedback: GainNode | null = null;
   private analyser: AnalyserNode | null = null;
+  private activePatch: Patch | null = null;
+  private connectionRevision = 0;
+  private reconnectedAt = 0;
+  private measurementSequence = 0;
   private timer: number | null = null;
   private nextBeat = 0;
   private beat = 0;
@@ -49,11 +62,16 @@ export class AudioEngine {
     this.noiseLevel = null;
     this.delayFeedback = null;
     this.analyser = null;
+    this.activePatch = null;
+    this.connectionRevision = 0;
+    this.reconnectedAt = 0;
+    this.measurementSequence += 1;
     if (context && context.state !== 'closed') await context.close();
   }
 
   update(patch: Patch): void {
     this.bpm = patch.bpm;
+    this.activePatch = structuredClone(patch);
     if (!this.context) return;
     const now = this.context.currentTime;
     const osc = this.oscillator;
@@ -86,9 +104,11 @@ export class AudioEngine {
 
   reconnect(patch: Patch): void {
     if (!this.context) return;
+    this.activePatch = structuredClone(patch);
     for (const [id, port] of this.ports) {
       if (id !== 'speaker') port.output?.disconnect();
     }
+    this.delayFeedback?.disconnect();
     const delay = this.ports.get('delay')?.output;
     if (delay && this.delayFeedback) {
       delay.connect(this.delayFeedback);
@@ -98,6 +118,76 @@ export class AudioEngine {
       const output = this.ports.get(from)?.output;
       const input = this.ports.get(to)?.input;
       if (output && input) output.connect(input);
+    });
+    this.connectionRevision += 1;
+    this.reconnectedAt = this.context.currentTime;
+    window.dispatchEvent(new CustomEvent('patchboard:graph-reconnected', {
+      detail: {
+        connectionRevision: this.connectionRevision,
+        audioTime: this.reconnectedAt,
+        connections: structuredClone(patch.connections),
+      },
+    }));
+  }
+
+  /**
+   * Measures the active speaker analyser over four complete beat intervals.
+   * The window starts only after the current delay feedback tail has decayed
+   * below -80 dB, so a reconnect is compared with new graph output rather than
+   * samples left by the previous graph.
+   */
+  async measureOutput(): Promise<OutputMeasurement> {
+    const context = this.context;
+    const analyser = this.analyser;
+    const patch = this.activePatch;
+    if (!context || !analyser || !patch || context.state !== 'running') {
+      throw new Error('Start audio before measuring its output.');
+    }
+
+    const sequence = ++this.measurementSequence;
+    const connectionRevision = this.connectionRevision;
+    const feedback = patch.params.delay.feedback;
+    const echoesToSilence = feedback > 0
+      ? Math.ceil(Math.log(0.0001) / Math.log(feedback))
+      : 0;
+    const tailSeconds = patch.params.delay.time * echoesToSilence + 0.08;
+    const startAudioTime = Math.max(context.currentTime + 0.05, this.reconnectedAt + tailSeconds);
+    const endAudioTime = startAudioTime + (60 / this.bpm) * 4;
+    const samples = new Float32Array(analyser.fftSize);
+    let sumSquares = 0;
+    let sampledFrames = 0;
+    let peak = 0;
+
+    await this.waitForAudioTime(context, startAudioTime, sequence);
+
+    return new Promise<OutputMeasurement>((resolve, reject) => {
+      const sample = (): void => {
+        if (this.context !== context || this.analyser !== analyser || this.measurementSequence !== sequence || this.connectionRevision !== connectionRevision) {
+          reject(new Error('Audio output changed before measurement finished.'));
+          return;
+        }
+
+        analyser.getFloatTimeDomainData(samples);
+        for (const value of samples) {
+          sumSquares += value * value;
+          peak = Math.max(peak, Math.abs(value));
+        }
+        sampledFrames += samples.length;
+
+        if (context.currentTime >= endAudioTime) {
+          resolve({
+            connectionRevision,
+            startAudioTime,
+            endAudioTime,
+            rms: Math.sqrt(sumSquares / sampledFrames),
+            peak,
+            sampledFrames,
+          });
+          return;
+        }
+        window.setTimeout(sample, 20);
+      };
+      sample();
     });
   }
 
@@ -112,7 +202,13 @@ export class AudioEngine {
     const noise = context.createBufferSource();
     const buffer = context.createBuffer(1, context.sampleRate * 2, context.sampleRate);
     const data = buffer.getChannelData(0);
-    for (let index = 0; index < data.length; index += 1) data[index] = Math.random() * 2 - 1;
+    let noiseSeed = 0x51f15e;
+    for (let index = 0; index < data.length; index += 1) {
+      noiseSeed ^= noiseSeed << 13;
+      noiseSeed ^= noiseSeed >>> 17;
+      noiseSeed ^= noiseSeed << 5;
+      data[index] = ((noiseSeed >>> 0) / 0xffffffff) * 2 - 1;
+    }
     noise.buffer = buffer;
     noise.loop = true;
     const noiseLevel = context.createGain();
@@ -129,6 +225,7 @@ export class AudioEngine {
     const speaker = context.createGain();
     const analyser = context.createAnalyser();
     analyser.fftSize = 1024;
+    analyser.smoothingTimeConstant = 0;
     speaker.connect(analyser).connect(context.destination);
 
     this.oscillator = oscillator;
@@ -191,6 +288,16 @@ export class AudioEngine {
     window.dispatchEvent(new CustomEvent('patchboard:filter-response', {
       detail: { cutoff, filterQ: filter.Q.value, magnitude: magnitude[0] },
     }));
+  }
+
+  private async waitForAudioTime(context: AudioContext, target: number, sequence: number): Promise<void> {
+    while (context.currentTime < target) {
+      if (this.context !== context || this.measurementSequence !== sequence) {
+        throw new Error('Audio output changed before measurement started.');
+      }
+      const remaining = Math.max(0, target - context.currentTime);
+      await new Promise<void>((resolve) => window.setTimeout(resolve, Math.min(40, remaining * 1000)));
+    }
   }
 
   private pulse(param: AudioParam | undefined, time: number, length: number, level: number): void {

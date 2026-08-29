@@ -1,1 +1,1 @@
-Build and hear a six-module Web Audio graph before adding it to your code.
+Build, hear, and export a six-module Web Audio graph before adding it to your code.

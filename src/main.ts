@@ -5,7 +5,7 @@ import { NODE_DEFINITIONS, connectionError, decodeSession, encodeSession, isVali
 import type { NodeId, Patch, Session } from './types';
 
 const STORAGE_KEY = 'patchboard.session.v1';
-const BUILD_ID = 'polish-2';
+const BUILD_ID = 'polish-3';
 const SITE_URL = 'https://audio-graph-sketchpad.sociobot.in';
 const app = document.querySelector<HTMLDivElement>('#app')!;
 let cleanupRoute = (): void => undefined;
@@ -52,7 +52,7 @@ function renderLegal(route: '/privacy' | '/terms'): void {
   const privacy = route === '/privacy';
   app.innerHTML = `${siteHeader()}<main id="main" class="legal-page" tabindex="-1"><p class="brand-kicker">Patchboard / ${privacy ? 'privacy' : 'terms'}</p><h1>${privacy ? 'Patchboard privacy' : 'Patchboard terms'}</h1>${privacy ? `
     <h2>What this browser stores</h2><p>Normal mode stores your A/B patch, motion preference, and edit count in local storage.</p><p>Demo mode uses memory only. It never reads or changes your normal patch.</p>
-    <h2>What leaves this browser</h2><p>Patchboard sends no patch, audio, identifier, analytics event, cookie, microphone input, or personal data.</p><p>A share link keeps patch data after the # character. Browsers do not include that fragment in a server request.</p>
+    <h2>What leaves this browser</h2><p>Editing sends no patch or audio data elsewhere. Patchboard does not use cookies or analytics.</p><p>Patchboard never requests microphone access.</p><p>A share link keeps patch data after the # character. Browsers do not include that fragment in a server request.</p>
       <h2>Remove your data</h2><p>Select “Start new patch” or clear this site’s storage.</p>` : `
     <h2>Using Patchboard</h2><p>Patchboard is a free educational tool provided “as is.” Use it to learn, sketch, and share synthesized audio graphs.</p>
     <h2>Your patches</h2><p>You keep all rights to patch settings you create. Anyone with your share link can read its embedded patch.</p>
@@ -160,6 +160,15 @@ function startApp(demoMode: boolean): () => void {
   const shareUrl = byId<HTMLInputElement>('share-url');
   const codeOutput = byId<HTMLTextAreaElement>('code-output');
   const patch = (): Patch => session.variants[session.active];
+
+  window.addEventListener('patchboard:measure-output', ((event: CustomEvent<{ requestId?: string }>) => {
+    const requestId = event.detail?.requestId ?? '';
+    void engine.measureOutput()
+      .then((measurement) => window.dispatchEvent(new CustomEvent('patchboard:output-measured', { detail: { requestId, ...measurement } })))
+      .catch((error: unknown) => window.dispatchEvent(new CustomEvent('patchboard:output-measurement-error', {
+        detail: { requestId, message: error instanceof Error ? error.message : 'Audio output could not be measured.' },
+      })));
+  }) as EventListener, { signal });
 
   function setStatus(message: string, kind: 'success' | 'error' | '' = ''): void { statusLine.textContent = message; statusLine.className = `status-line ${kind}`.trim(); }
   function persist(announce = false): void {

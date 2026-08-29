@@ -27,16 +27,35 @@ test('mobile first screen fits and keeps the sample action visible', async ({ pa
   await page.goto('/');
   const size = await page.evaluate(() => ({ scroll: document.documentElement.scrollWidth, viewport: innerWidth }));
   expect(size.scroll).toBeLessThanOrEqual(size.viewport);
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Hear a Web Audio graph before coding it');
   await expect(page.getByRole('link', { name: 'Try it with sample data' })).toBeVisible();
   await expect(page.getByText('For creative coders learning how six browser audio modules affect one another.')).toBeVisible();
+  await expect(page.getByText('Free.', { exact: true })).toBeVisible();
+  await expect(page.getByText('Works offline after your first visit.', { exact: true })).toBeVisible();
+  await expect(page.getByText('Patches stay in this browser.', { exact: true })).toBeVisible();
 });
 
-test('first-screen sample action enters the isolated demo in one click', async ({ page }) => {
+test('first-screen sample action enters the isolated demo in one click', async ({ page }, testInfo) => {
   await page.goto('/');
   await page.getByRole('link', { name: 'Try it with sample data' }).click();
   await expect(page).toHaveURL(/\?demo=1$/);
   await expect(page.getByText('Demo — sample data, nothing is saved')).toBeVisible();
   await expect(page.getByRole('textbox', { name: 'Patch', exact: true })).toHaveValue('Neon steps');
+  if (testInfo.project.name === 'mobile') {
+    for (const locator of [
+      page.getByText('Demo — sample data, nothing is saved'),
+      page.getByRole('heading', { level: 1 }),
+      page.getByText('920 Hz cutoff · 240 ms delay · 4 cables'),
+      page.getByText('Oscillator → Filter → Delay → Gain → Speaker'),
+      page.getByRole('button', { name: 'Start audio' }),
+      page.getByRole('textbox', { name: 'Patch', exact: true }),
+      page.getByRole('heading', { name: 'Signal graph' }),
+    ]) {
+      const box = await locator.boundingBox();
+      expect(box, 'demo content must have a rendered box').not.toBeNull();
+      expect(box!.y, 'demo content must begin in the first phone viewport').toBeLessThan(844);
+    }
+  }
 });
 
 test('metadata and crawl files are route-correct', async ({ page, request }) => {

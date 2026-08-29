@@ -12,16 +12,56 @@ async function saveNormalPatch(page: import('@playwright/test').Page, name: stri
   return page.evaluate(() => localStorage.getItem('patchboard.session.v1') ?? '');
 }
 
+type OutputMeasurement = {
+  requestId: string;
+  connectionRevision: number;
+  startAudioTime: number;
+  endAudioTime: number;
+  rms: number;
+  peak: number;
+  sampledFrames: number;
+};
+
+async function measureActiveOutput(page: import('@playwright/test').Page, requestId: string): Promise<OutputMeasurement> {
+  return page.evaluate((id) => new Promise<OutputMeasurement>((resolve, reject) => {
+    const timeout = window.setTimeout(() => reject(new Error(`Timed out measuring ${id}`)), 15_000);
+    const measured = ((event: CustomEvent<OutputMeasurement>) => {
+      if (event.detail.requestId !== id) return;
+      window.clearTimeout(timeout);
+      window.removeEventListener('patchboard:output-measured', measured as EventListener);
+      window.removeEventListener('patchboard:output-measurement-error', failed as EventListener);
+      resolve(event.detail);
+    }) as EventListener;
+    const failed = ((event: CustomEvent<{ requestId: string; message: string }>) => {
+      if (event.detail.requestId !== id) return;
+      window.clearTimeout(timeout);
+      window.removeEventListener('patchboard:output-measured', measured as EventListener);
+      window.removeEventListener('patchboard:output-measurement-error', failed as EventListener);
+      reject(new Error(event.detail.message));
+    }) as EventListener;
+    window.addEventListener('patchboard:output-measured', measured);
+    window.addEventListener('patchboard:output-measurement-error', failed);
+    window.dispatchEvent(new CustomEvent('patchboard:measure-output', { detail: { requestId: id } }));
+  }), requestId);
+}
+
 test('@claim:demo-isolation sample edits and reset never touch a saved normal patch', async ({ page }) => {
   const normalPatch = await saveNormalPatch(page, 'NORMAL PATCH');
   expect(normalPatch).toContain('NORMAL PATCH');
   await page.goto('/?demo=1');
   await expect(page.getByRole('textbox', { name: 'Patch', exact: true })).toHaveValue('Neon steps');
   await page.getByRole('textbox', { name: 'Patch', exact: true }).fill('DEMO EDIT');
+  await page.getByRole('button', { name: 'Hear B' }).click();
+  await page.getByLabel('Cutoff').fill('1111');
   expect(await page.evaluate(() => localStorage.getItem('patchboard.session.v1'))).toBe(normalPatch);
   expect(await page.evaluate(() => Object.keys(localStorage).filter((key) => key.startsWith('demo:')))).toEqual([]);
   await page.getByRole('button', { name: 'Reset demo' }).click();
   await expect(page.getByRole('textbox', { name: 'Patch', exact: true })).toHaveValue('Neon steps');
+  await expect(page.getByRole('button', { name: 'Hear A' })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByLabel('Cutoff')).toHaveValue('920');
+  await page.getByRole('button', { name: 'Hear B' }).click();
+  await expect(page.getByLabel('Cutoff')).toHaveValue('2600');
+  await expect(page.getByText('Noise → Filter', { exact: true })).toBeVisible();
   await page.getByRole('link', { name: 'Start for real' }).click();
   await expect(page.getByRole('textbox', { name: 'Patch', exact: true })).toHaveValue('NORMAL PATCH');
   expect(await page.evaluate(() => localStorage.getItem('patchboard.session.v1'))).toBe(normalPatch);
@@ -36,21 +76,20 @@ test('@claim:six-modules demo exposes exactly six connectable modules', async ({
 });
 
 test('@claim:audible-edits removing a Patchboard cable changes its running audio output', async ({ page }) => {
-  await page.evaluate(() => {
-    (window as unknown as { levels: number[] }).levels = [];
-    window.addEventListener('patchboard:audio-level', ((event: CustomEvent<{ level: number }>) => { (window as unknown as { levels: number[] }).levels.push(event.detail.level); }) as unknown as EventListener);
-  });
   await page.getByRole('button', { name: 'Start audio' }).click();
-  await expect.poll(() => page.evaluate(() => Math.max(...(window as unknown as { levels: number[] }).levels, 0))).toBeGreaterThan(1);
-  const connectedLevel = await page.evaluate(() => Math.max(...(window as unknown as { levels: number[] }).levels, 0));
+  const connected = await measureActiveOutput(page, 'connected-filter-delay');
+  expect(connected.endAudioTime - connected.startAudioTime).toBeCloseTo((60 / 108) * 4, 6);
+  expect(connected.rms).toBeGreaterThan(0.003);
+  expect(connected.peak).toBeGreaterThan(0.05);
+  expect(connected.sampledFrames).toBeGreaterThan(20_000);
   await page.getByRole('button', { name: 'Remove cable from Filter to Delay' }).click();
   await expect(page.locator('#status-line')).toContainText('removed');
-  await page.waitForTimeout(1600);
-  const disconnectedLevel = await page.evaluate(() => {
-    const levels = (window as unknown as { levels: number[] }).levels;
-    return Math.max(...levels.slice(-20), 0);
-  });
-  expect(disconnectedLevel).toBeLessThan(connectedLevel * 0.25);
+  const disconnected = await measureActiveOutput(page, 'disconnected-filter-delay');
+  expect(disconnected.connectionRevision).toBeGreaterThan(connected.connectionRevision);
+  expect(disconnected.startAudioTime).toBeGreaterThan(connected.endAudioTime);
+  expect(disconnected.endAudioTime - disconnected.startAudioTime).toBeCloseTo((60 / 108) * 4, 6);
+  expect(disconnected.rms).toBeLessThan(connected.rms * 0.01);
+  expect(disconnected.peak).toBeLessThan(connected.peak * 0.01);
 });
 
 test('@claim:synthesized-audio Patchboard starts a browser graph without samples or microphone access', async ({ page }) => {
@@ -62,7 +101,11 @@ test('@claim:synthesized-audio Patchboard starts a browser graph without samples
       navigator.mediaDevices.getUserMedia = ((constraints: MediaStreamConstraints) => { audit.microphoneCalls += 1; return getUserMedia(constraints); }) as typeof navigator.mediaDevices.getUserMedia;
     }
     const fetch = window.fetch.bind(window); window.fetch = ((input: RequestInfo | URL, init?: RequestInit) => { audit.fetches.push(String(input)); return fetch(input, init); }) as typeof window.fetch;
-    const open = XMLHttpRequest.prototype.open; XMLHttpRequest.prototype.open = function(...args: [string, string | URL, boolean?, string?, string?]) { audit.xhrs.push(String(args[1])); return open.call(this, ...args); } as unknown as typeof XMLHttpRequest.prototype.open;
+    const open = XMLHttpRequest.prototype.open;
+    XMLHttpRequest.prototype.open = function(this: XMLHttpRequest, ...args: Parameters<XMLHttpRequest['open']>) {
+      audit.xhrs.push(String(args[1]));
+      Reflect.apply(open, this, args);
+    } as typeof XMLHttpRequest.prototype.open;
     const decode = BaseAudioContext.prototype.decodeAudioData; BaseAudioContext.prototype.decodeAudioData = function(...args: Parameters<BaseAudioContext['decodeAudioData']>) { audit.decodes += 1; return decode.apply(this, args); };
     const play = HTMLMediaElement.prototype.play; HTMLMediaElement.prototype.play = function() { audit.mediaPlays += 1; return play.call(this); };
   });
@@ -126,7 +169,7 @@ test('@claim:feedback-blocked cycle attempt leaves graph unchanged with an error
 });
 
 test('@claim:audio-clock-schedule beat positions carry the audio-clock time', async ({ page }) => {
-  await page.evaluate(() => { (window as unknown as { scheduled: Array<{ audioTime: number; currentAudioTime: number }> }).scheduled = []; window.addEventListener('patchboard:beat-scheduled', ((event: CustomEvent) => (window as unknown as { scheduled: unknown[] }).scheduled.push(event.detail)) as EventListener); });
+  await page.evaluate(() => { (window as unknown as { scheduled: Array<{ audioTime: number; currentAudioTime: number }> }).scheduled = []; window.addEventListener('patchboard:beat-scheduled', ((event: CustomEvent) => (window as unknown as { scheduled: unknown[] }).scheduled.push(event.detail)) as unknown as EventListener); });
   await page.getByRole('button', { name: 'Start audio' }).click();
   await expect.poll(() => page.evaluate(() => (window as unknown as { scheduled: unknown[] }).scheduled.length)).toBeGreaterThan(1);
   const events = await page.evaluate(() => (window as unknown as { scheduled: Array<{ audioTime: number; currentAudioTime: number }> }).scheduled.slice(0, 2));
@@ -159,6 +202,8 @@ test('@claim:local-only normal storage survives an isolated demo and no edit sen
   expect(storage.local.join('')).toContain('NORMAL STORAGE PATCH');
   expect(JSON.stringify(storage)).not.toContain('DEMO MUTATION');
   expect(requests.filter((url) => new URL(url).origin !== new URL(page.url()).origin)).toEqual([]);
+  expect(await page.evaluate(() => document.cookie)).toBe('');
+  expect(requests.map((url) => new URL(url).pathname).filter((path) => !/^\/(?:$|assets\/|art\/|sw\.js$|icon\.svg$|manifest\.webmanifest$)/.test(path))).toEqual([]);
 });
 
 test('@claim:native-filter-node engine uses a low-pass BiquadFilterNode', async ({ page }) => {
@@ -195,7 +240,7 @@ test('@claim:code-export generated JavaScript contains values and active connect
   expect(result.cutoff).toBe(920); expect(result.delay).toBeCloseTo(0.24, 4);
 });
 
-test('@claim:free-use editor opens without account or payment gate', async ({ page }) => {
+test('@claim:free-use editor opens without account or checkout controls', async ({ page }) => {
   await page.getByRole('link', { name: 'Start for real' }).click();
   await expect(page.getByText('Free.', { exact: true })).toBeVisible(); await expect(page.getByRole('button', { name: 'Start audio' })).toBeEnabled(); await expect(page.locator('input[type=password], [href*="checkout"], [href*="login"]')).toHaveCount(0);
 });
