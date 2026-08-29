@@ -1,44 +1,39 @@
-# Patchboard polish round 1 handoff
+# Adversarial review 2 handoff
 
 ## Outcome
 
-All findings F-1-1 through F-1-43 are resolved. Patchboard remains a static Vite + TypeScript site with its dark pixel-workbench identity.
+Review 2 is complete with verdict **FAIL**. The full report is `.factory/review-2.md`.
 
-The release adds a clear first screen, memory-only sample mode, complete claim registry, working code export, shared route shell, route metadata/focus, legal pages, XML sitemap, and a real styled 404.
+No product code was modified. The only new evidence files are the cold mobile/desktop first-screen captures and the mobile demo first-screen capture under `.factory/evidence/`.
 
-Live site: <https://audio-graph-sketchpad.sociobot.in>
+## Blocking issues
 
-Demo: <https://audio-graph-sketchpad.sociobot.in/?demo=1>
+- F-1-2: the first mobile viewport after entering the demo repeats the landing hero; the seeded editor is below the fold.
+- F-1-3, F-1-6, F-1-7, F-1-17, F-1-23: five passing claim tests bypass Patchboard or omit material parts of their claims.
+- F-1-31: Back restores route and H1 focus but not the prior scroll position.
+- F-1-39: README uses “16-step position” instead of the required consistent “16-step beat position.”
 
-## Verification evidence
+The report also records two unlisted claims and eleven minor plain-word/404 copy findings.
 
-- Clean clone: `/tmp/patchboard-polish-BUkZ7s` from commit `7ab7234`.
-- `npm ci`: passed, 0 vulnerabilities.
-- `npm test`: passed; 9 unit/structure checks and 31 browser checks, with 17 intentional duplicate-project skips.
-- `npm run build`: passed; `dist/` contains root, demo, privacy, terms, 404, sitemap, worker, and static config.
-- Build payload: JavaScript 34.52 KB raw / 11.87 KB gzip; CSS 15.53 KB raw / 4.27 KB gzip.
-- Every command in `.factory/claims.json`: passed individually from the clean clone, 16/16.
-- Local Lighthouse 12.8.2 mobile: performance 100, accessibility 100, best practices 100, SEO 100; LCP 1.5 s, CLS 0, TBT 0 ms.
-- Local Lighthouse desktop: all four category scores 100; LCP 0.4 s, CLS 0, TBT 0 ms.
-- Factory `verify-url.sh` on live `/` and `/?demo=1`: HTTP 200, one H1, main present, no missing alt, no unlabeled button, no console errors.
-- Live `npm run verify:live`: five routes checked, unknown route HTTP 404, zero serious/critical axe findings, zero unexpected console errors, zero external requests, no 390 px overflow, offline reload passed.
-- Live `npm run test:claims`: 16 passed.
-- Live `npm run test:e2e`: 31 passed with 17 intentional duplicate-project skips.
-- Final deployment ID: `40824312-c3b9-4720-ba14-ac7c38f4ef0f` on Azure Static Web Apps.
+## Verification performed
 
-Evidence paths: `.factory/evidence/lighthouse-summary.json`, `.factory/evidence/live-root/`, `.factory/evidence/live-demo/`, and `.factory/evidence/live-cold/`.
+- Opened the live root cold at 390 × 844 and 1440 × 900 before scrolling.
+- Entered demo in one click; edited and reset the sample; verified a valid normal patch remained unchanged; verified no demo storage key appeared.
+- Recorded the complete observed live request flow; all requests were same-origin.
+- Ran every `.factory/claims.json` command separately from clean clone `/tmp/patchboard-review2-X68QbY/clone`: 16/16 exited 0.
+- Ran `npm test` in that clone: 9 unit/structure tests and 31 browser tests passed; 17 duplicate-project tests were skipped as configured.
+- Ran `npm run build`: `dist/` produced; JS was 34.56 KB raw / 11.86 KB gzip.
+- Ran `npm run verify:live`: five routes checked, unknown route 404, no serious/critical axe issues, no unexpected console errors, no external requests, no mobile overflow, offline reload passed.
+- Crawled all discovered links on `/`, `/demo`, `/privacy`, `/terms`, and `/404.html`; all returned 200 after fragments were removed.
+- Confirmed clean-build/live SHA-256 equality for HTML, JavaScript, and CSS.
+- Read and rechecked all 43 findings in `.factory/review-1.md`, every closure in `.factory/polish-1.md`, the earlier handoff, and both independent verification reports.
 
-## Run locally
+## Evidence
 
-```sh
-npm ci
-npm test
-npm run build
-npm run preview
-```
+- `.factory/evidence/review-2-mobile-first-screen.png`
+- `.factory/evidence/review-2-desktop-first-screen.png`
+- `.factory/evidence/review-2-demo-mobile.png`
 
-Run all claims with `npm run test:claims`. Run the deployed cold audit with `npm run verify:live`.
+## Next step
 
-## Known gaps and next steps
-
-None for the reviewed scope. The product remains intentionally limited to six synthesized modules and does not request microphone access.
+Repair every finding in `.factory/review-2.md`, then repeat the full review rather than only the reopened checks. Do not treat the 16 green claim commands as acceptance until the five defective claim tests exercise the actual product behavior.
