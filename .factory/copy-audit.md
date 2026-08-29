@@ -1,54 +1,57 @@
-# Copy audit — polish round 1
+# Copy audit — polish round 2
 
-Count method: hyphenated terms and URLs count as one word. No sentence exceeds 22 words. No banned marketing term remains.
+Reviewed 29 August 2026. Counts treat hyphenated words, A/B, and URLs as one word. All authored landing, demo, dialog, error, offline, README, and legal-route sentences are at most 22 words. No banned marketing words appear in visitor-facing copy.
 
-## First screen
+## Landing and demo copy
 
 | Words | Copy |
 | ---: | --- |
-| 6 | Browser audio / saved on this device |
-| 8 | Hear a Web Audio graph before coding it |
-| 10 | For creative coders learning how six browser audio modules affect one another. |
-| 5 | Try it with sample data |
-| 8 | Loads a ready-to-hear patch; nothing is saved. |
-| 3 | Build your patch |
+| 8 | Hear a Web Audio graph before coding it. |
+| 12 | For creative coders learning how six browser audio modules affect one another. |
+| 7 | Loads a ready-to-hear patch; nothing is saved. |
 | 1 | Free. |
 | 6 | Works offline after your first visit. |
 | 5 | Patches stay in this browser. |
-
-The headline names the job, the next sentence names the audience, and the cyan sample action is the only primary action.
-
-## Landing and editor sentences
-
-| Words | Copy |
-| ---: | --- |
-| 7 | Build and hear a six-module graph |
-| 8 | Connect modules, start audio, then compare one change |
 | 6 | Patchboard makes sound in this browser. |
 | 6 | It uses no samples or microphone. |
 | 8 | A share link can carry both A/B variants. |
-| 11 | Sample ready. Press Start audio, then switch between Hear A and Hear B. |
-| 11 | Choose Edit cables, then select a source and destination. Patchboard blocks feedback loops. |
-| 13 | Start audio. The 16-step beat position follows the same audio clock as each sound. |
-| 14 | Copy A to B. Change one value or cable, then switch variants while sound runs. |
-| 14 | Patchboard needs no account, upload, sample library, or microphone. It has no tracks or cloud projects. |
-| 13 | Normal patches use this browser’s local storage. Demo changes stay only in the open tab. |
-| 9 | Build and hear small Web Audio graphs in your browser. |
-| 4 | Original AI-generated pixel artwork. |
+| 5 | Neon steps sample patch. |
+| 8 | 920 Hz cutoff · 240 ms delay · 4 cables. |
+| 5 | Oscillator → Filter → Delay → Gain → Speaker. |
+| 7 | Demo — sample data, nothing is saved. |
+| 9 | Choose Edit cables, then select a source and destination. |
+| 12 | The 16-step beat position follows the same audio clock as each sound. |
+| 9 | Patchboard needs no account, upload, sample library, or microphone. |
+| 7 | It has no tracks or cloud projects. |
+| 10 | Normal patches stay in this browser. Demo changes disappear when you leave. |
+| 3 | Page not found. |
 
-Short labels, control values, status messages, legal copy, and dialog instructions were also checked. Their longest sentence is 20 words.
+## README copy
 
-## README
-
-Every prose sentence is 22 words or fewer. The longest sentence has 20 words. Claim-like statements map to `.factory/claims.json`.
+| Words | Copy |
+| ---: | --- |
+| 13 | Patchboard helps creative coders hear a small Web Audio graph before coding it. |
+| 9 | Connect six browser audio modules and hear the result. |
+| 11 | Compare A/B variants, then share the patch or copy working JavaScript. |
+| 7 | Patchboard is for creative coders learning Web Audio. |
+| 15 | Use it to understand a small graph before adding it to a performance or app. |
+| 7 | This is not recording or music-production software. |
+| 13 | It has no tracks, cloud projects, account, upload, sample library, or microphone control. |
+| 13 | Blocks graph feedback loops and shows the 16-step beat position from the audio clock. |
+| 10 | Stores normal patches in this browser. Demo changes disappear when you leave. |
+| 13 | Restores two variants from a share link. Browsers do not send the part after # to the server. |
+| 7 | Is free and needs no account. |
+| 11 | Deploy the generated dist/ directory as an Azure Static Web App. |
+| 12 | Read how the visual system and artwork were made in .factory/design.md. |
 
 ## Terminology
 
-| Concept | Term |
+| Concept | Single term |
 | --- | --- |
-| Alternate sound | variant |
+| Intended user | creative coders |
+| Storage boundary | this browser |
+| Demo entry | sample data |
+| Loaded demo object | sample patch |
 | Timing display | 16-step beat position |
-| Audio building block | module |
-| Saved design | patch |
-| One connection | cable |
-| Complete topology | graph |
+| Alternate sound | variant |
+| One connection / topology | cable / graph |

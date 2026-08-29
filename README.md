@@ -6,23 +6,23 @@ Connect six browser audio modules and hear the result. Compare A/B variants, the
 
 Live: <https://audio-graph-sketchpad.sociobot.in>
 
-Try the isolated sample: <https://audio-graph-sketchpad.sociobot.in/?demo=1>
+Try it with sample data: <https://audio-graph-sketchpad.sociobot.in/?demo=1>
 
 ## Who it is for
 
-Patchboard is for developers learning Web Audio. Use it to understand a small graph before adding it to a performance or app.
+Patchboard is for creative coders learning Web Audio. Use it to understand a small graph before adding it to a performance or app.
 
-This is not a DAW. It has no tracks, cloud projects, account, upload, sample library, or microphone control.
+This is not recording or music-production software. It has no tracks, cloud projects, account, upload, sample library, or microphone control.
 
 ## What it does
 
 - Generates audio in the browser and starts it only after your click.
-- Blocks graph feedback loops and shows a 16-step position from the audio clock.
-- Stores normal patches in browser local storage. The demo uses memory only.
-- Restores two variants from a share link without sending its fragment to the server.
+- Blocks graph feedback loops and shows the 16-step beat position from the audio clock.
+- Stores normal patches in this browser. Demo changes disappear when you leave.
+- Restores two variants from a share link. Browsers do not send the part after `#` to the server.
 - Generates Web Audio JavaScript for the active variant.
 - Works offline after the first visit.
-- Is free to use without an account or payment gate.
+- Is free and needs no account.
 
 Each statement maps to a tagged browser test in [.factory/claims.json](.factory/claims.json).
 
@@ -43,7 +43,7 @@ Run `npm run test:e2e` for desktop, mobile, routing, keyboard, offline, privacy,
 
 Run `npm run test:claims` to execute every claim from the isolated demo.
 
-Deploy the generated `dist/` directory as an Azure Static Web App. The product remains a static site.
+Deploy the generated `dist/` directory as an Azure Static Web App.
 
 ## Privacy
 
@@ -51,7 +51,7 @@ Patchboard sends no patch or audio data elsewhere. Normal patches stay in this b
 
 Read `/privacy` and `/terms` in the built app. Demo details are in [.factory/demo.md](.factory/demo.md).
 
-The visual system and generated-art provenance are in [.factory/design.md](.factory/design.md).
+Read how the visual system and artwork were made in [.factory/design.md](.factory/design.md).
 
 ## License
 

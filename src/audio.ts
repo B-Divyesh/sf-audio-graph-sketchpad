@@ -11,6 +11,7 @@ export class AudioEngine {
   private noiseGate: GainNode | null = null;
   private noiseLevel: GainNode | null = null;
   private delayFeedback: GainNode | null = null;
+  private analyser: AnalyserNode | null = null;
   private timer: number | null = null;
   private nextBeat = 0;
   private beat = 0;
@@ -47,6 +48,7 @@ export class AudioEngine {
     this.noiseGate = null;
     this.noiseLevel = null;
     this.delayFeedback = null;
+    this.analyser = null;
     if (context && context.state !== 'closed') await context.close();
   }
 
@@ -70,6 +72,13 @@ export class AudioEngine {
     gain?.gain.setTargetAtTime(patch.params.gain.gain, now, 0.015);
     const speaker = this.ports.get('speaker')?.input as GainNode | undefined;
     speaker?.gain.setTargetAtTime(patch.params.speaker.volume * 0.42, now, 0.015);
+    window.dispatchEvent(new CustomEvent('patchboard:graph-updated', {
+      detail: {
+        filterQ: patch.params.filter.resonance,
+        cutoff: patch.params.filter.cutoff,
+        connections: structuredClone(patch.connections),
+      },
+    }));
   }
 
   reconnect(patch: Patch): void {
@@ -115,7 +124,9 @@ export class AudioEngine {
     const delayFeedback = context.createGain();
     const gain = context.createGain();
     const speaker = context.createGain();
-    speaker.connect(context.destination);
+    const analyser = context.createAnalyser();
+    analyser.fftSize = 1024;
+    speaker.connect(analyser).connect(context.destination);
 
     this.oscillator = oscillator;
     this.noise = noise;
@@ -123,6 +134,7 @@ export class AudioEngine {
     this.noiseGate = noiseGate;
     this.noiseLevel = noiseLevel;
     this.delayFeedback = delayFeedback;
+    this.analyser = analyser;
     this.ports = new Map<NodeId, NodePort>([
       ['osc', { input: null, output: oscGate }],
       ['noise', { input: null, output: noiseGate }],
@@ -132,7 +144,7 @@ export class AudioEngine {
       ['speaker', { input: speaker, output: null }],
     ]);
     window.dispatchEvent(new CustomEvent('patchboard:graph-built', {
-      detail: { filterClass: filter.constructor.name, filterType: filter.type },
+      detail: { filterClass: filter.constructor.name, filterType: filter.type, filterQ: filter.Q.value, cutoff: filter.frequency.value, connections: structuredClone(patch.connections) },
     }));
     this.update(patch);
     this.reconnect(patch);
@@ -157,6 +169,15 @@ export class AudioEngine {
       this.beat = (this.beat + 1) % 16;
       this.nextBeat += secondsPerBeat;
     }
+    this.reportOutputLevel();
+  }
+
+  private reportOutputLevel(): void {
+    if (!this.analyser) return;
+    const samples = new Uint8Array(this.analyser.fftSize);
+    this.analyser.getByteTimeDomainData(samples);
+    const level = samples.reduce((total, sample) => total + Math.abs(sample - 128), 0) / samples.length;
+    window.dispatchEvent(new CustomEvent('patchboard:audio-level', { detail: { level } }));
   }
 
   private pulse(param: AudioParam | undefined, time: number, length: number, level: number): void {

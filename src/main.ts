@@ -5,7 +5,7 @@ import { NODE_DEFINITIONS, connectionError, decodeSession, encodeSession, isVali
 import type { NodeId, Patch, Session } from './types';
 
 const STORAGE_KEY = 'patchboard.session.v1';
-const BUILD_ID = 'polish-1';
+const BUILD_ID = 'polish-2';
 const SITE_URL = 'https://audio-graph-sketchpad.sociobot.in';
 const app = document.querySelector<HTMLDivElement>('#app')!;
 let cleanupRoute = (): void => undefined;
@@ -45,7 +45,7 @@ function siteHeader(): string {
 }
 
 function siteFooter(): string {
-  return `<footer class="site-footer"><p>Build and hear small Web Audio graphs in your browser. Original AI-generated pixel artwork.</p><nav class="footer-links" aria-label="Footer navigation"><a href="/privacy" data-route>Privacy</a><a href="/terms" data-route>Terms</a><a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API" rel="noreferrer">Web Audio reference (external)</a></nav><p>Built by Param Factory · ${BUILD_ID}</p></footer>`;
+  return `<footer class="site-footer"><p>Build and hear small Web Audio graphs in your browser.</p><nav class="footer-links" aria-label="Footer navigation"><a href="/privacy" data-route>Privacy</a><a href="/terms" data-route>Terms</a><a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API" rel="noreferrer">Web Audio reference (external)</a></nav><p>Built by Param Factory · ${BUILD_ID}</p></footer>`;
 }
 
 function renderLegal(route: '/privacy' | '/terms'): void {
@@ -60,10 +60,10 @@ function renderLegal(route: '/privacy' | '/terms'): void {
 }
 
 function renderNotFound(): void {
-  app.innerHTML = `${siteHeader()}<main id="main" class="not-found" tabindex="-1"><p class="brand-kicker">PATCH LOST / 404</p><h1>This page is not connected</h1><p>The address does not match a Patchboard page.</p><a class="button-link primary" href="/" data-route>Return to Patchboard</a></main>${siteFooter()}`;
+  app.innerHTML = `${siteHeader()}<main id="main" class="not-found" tabindex="-1"><p class="brand-kicker">PATCH LOST / 404</p><h1>Page not found.</h1><p>The address does not match a Patchboard page.</p><a class="button-link primary" href="/" data-route>Return to Patchboard</a></main>${siteFooter()}`;
 }
 
-function renderRoute(moveFocus = false): void {
+function renderRoute(options: { moveFocus?: boolean; scrollPosition?: number } = {}): void {
   cleanupRoute();
   cleanupRoute = (): void => undefined;
   const route = normalizedPath();
@@ -72,25 +72,37 @@ function renderRoute(moveFocus = false): void {
   if (effectiveRoute === '/privacy' || effectiveRoute === '/terms') renderLegal(effectiveRoute);
   else if (effectiveRoute === '/' || effectiveRoute === '/demo') cleanupRoute = startApp(effectiveRoute === '/demo');
   else renderNotFound();
-  if (moveFocus) {
-    window.scrollTo({ top: 0, behavior: 'instant' });
+  if (options.moveFocus) {
+    window.scrollTo({ top: options.scrollPosition ?? 0, behavior: 'instant' });
     requestAnimationFrame(() => {
       const heading = document.querySelector<HTMLHeadingElement>('h1');
-      heading?.setAttribute('tabindex', '-1'); heading?.focus();
+      heading?.setAttribute('tabindex', '-1'); heading?.focus({ preventScroll: true });
       const announcer = document.getElementById('route-announcer');
       if (announcer && heading) announcer.textContent = `${heading.textContent} page loaded.`;
     });
   }
 }
 
-function navigate(url: URL): void { history.pushState({}, '', `${url.pathname}${url.search}${url.hash}`); renderRoute(true); }
+function saveScrollPosition(): void {
+  const state = history.state && typeof history.state === 'object' ? history.state : {};
+  history.replaceState({ ...state, scrollY: window.scrollY }, '', window.location.href);
+}
+
+function navigate(url: URL): void {
+  saveScrollPosition();
+  history.pushState({ scrollY: 0 }, '', `${url.pathname}${url.search}${url.hash}`);
+  renderRoute({ moveFocus: true, scrollPosition: 0 });
+}
 document.addEventListener('click', (event) => {
   const link = (event.target as Element).closest<HTMLAnchorElement>('a[data-route]');
   if (!link || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
   const url = new URL(link.href); if (url.origin !== window.location.origin) return;
   event.preventDefault(); navigate(url);
 });
-window.addEventListener('popstate', () => renderRoute(true));
+window.addEventListener('popstate', () => {
+  const state = history.state && typeof history.state === 'object' ? history.state as { scrollY?: number } : {};
+  renderRoute({ moveFocus: true, scrollPosition: state.scrollY ?? 0 });
+});
 
 function startApp(demoMode: boolean): () => void {
   let loadMessage = '';
@@ -115,18 +127,18 @@ function startApp(demoMode: boolean): () => void {
   let cableSource: NodeId | null = null;
   let currentBeat = -1;
 
-  app.innerHTML = `${siteHeader()}${demoMode ? `<aside class="demo-banner" aria-label="Demo mode"><strong>Demo — sample data, nothing is saved</strong><span>Compare the ready-to-hear A/B patch.</span><div><button id="reset-demo" type="button">Reset demo</button><a href="/" data-route>Start for real</a></div></aside>` : ''}
+  app.innerHTML = `${siteHeader()}${demoMode ? `<aside class="demo-banner" aria-label="Demo mode"><strong>Demo — sample data, nothing is saved</strong><div><button id="reset-demo" type="button">Reset demo</button><a href="/" data-route>Start for real</a></div></aside>` : ''}
     <div id="network-banner" class="network-banner" role="status">You’re offline. Cached Patchboard tools and patches remain available.</div>
-    <main id="main" tabindex="-1">
-      <section class="first-screen" aria-labelledby="page-heading"><div class="hero-copy"><p class="brand-kicker">Browser audio / saved on this device</p><h1 id="page-heading">Hear a Web Audio graph before coding it</h1><p class="audience">For creative coders learning how six browser audio modules affect one another.</p><div class="hero-actions">${demoMode ? `<a class="button-link primary" href="#workbench">Hear the sample patch</a><span>Press Start audio, then switch between A and B.</span>` : `<a class="button-link primary" href="/?demo=1" data-route>Try it with sample data</a><span>Loads a ready-to-hear patch; nothing is saved.</span><a class="button-link secondary" href="#workbench">Build your patch</a>`}</div><ul class="plain-facts" aria-label="Key facts"><li>Free.</li><li>Works offline after your first visit.</li><li>Patches stay in this browser.</li></ul></div><img class="hero-art" src="/art/patch-spirit.webp" width="240" height="160" alt="Six connected modules show the kind of audio graph you can build." fetchpriority="high" decoding="async" /></section>
-      <section class="intro-strip" aria-labelledby="intro-heading"><div class="intro-copy"><p class="eyebrow">Build and hear a six-module graph</p><h2 id="intro-heading">Connect modules, start audio, then compare one change</h2><p>Patchboard makes sound in this browser. It uses no samples or microphone. A share link can carry both A/B variants.</p></div></section>
-      <section id="workbench" class="workbench" aria-label="Patchboard workbench"><div class="workbench-actions" aria-label="Patch actions">${demoMode ? '' : '<button id="save-button" type="button">Save in this browser</button>'}<button id="share-button" type="button">Share patch</button><button id="code-button" type="button">Copy Web Audio code</button>${demoMode ? '' : '<button id="new-button" class="danger" type="button">Start new patch</button>'}</div>
+    <main id="main" class="${demoMode ? 'demo-main' : ''}" tabindex="-1">
+      ${demoMode ? `<section class="demo-workbench-heading" aria-labelledby="page-heading"><div><p class="brand-kicker">Sample patch / variant ${session.active}</p><h1 id="page-heading">Neon steps sample patch</h1><p class="demo-values">920 Hz cutoff · 240 ms delay · 4 cables</p></div><p class="demo-connections">Oscillator → Filter → Delay → Gain → Speaker</p></section>` : `<section class="first-screen" aria-labelledby="page-heading"><div class="hero-copy"><p class="brand-kicker">Audio and patches stay in this browser</p><h1 id="page-heading">Hear a Web Audio graph before coding it</h1><p class="audience">For creative coders learning how six browser audio modules affect one another.</p><div class="hero-actions"><a class="button-link primary" href="/?demo=1" data-route>Try it with sample data</a><span>Loads a ready-to-hear patch; nothing is saved.</span><a class="button-link secondary" href="#workbench">Build your patch</a></div><ul class="plain-facts" aria-label="Key facts"><li>Free.</li><li>Works offline after your first visit.</li><li>Patches stay in this browser.</li></ul></div><img class="hero-art" src="/art/patch-spirit.webp" width="240" height="160" alt="Six connected modules show the kind of audio graph you can build." fetchpriority="high" decoding="async" /></section>
+      <section class="intro-strip" aria-labelledby="intro-heading"><div class="intro-copy"><p class="eyebrow">Build and hear a six-module graph</p><h2 id="intro-heading">Connect modules, start audio, then compare one change</h2><p>Patchboard makes sound in this browser. It uses no samples or microphone. A share link can carry both A/B variants.</p></div></section>`}
+      <section id="workbench" class="workbench" aria-label="Patchboard workbench">${demoMode ? '' : '<div class="workbench-actions" aria-label="Patch actions"><button id="save-button" type="button">Save in this browser</button><button id="share-button" type="button">Share patch</button><button id="code-button" type="button">Copy Web Audio code</button><button id="new-button" class="danger" type="button">Start new patch</button></div>'}
         <section class="transport" aria-label="Audio transport"><div class="transport-actions"><button id="transport-button" class="primary" type="button" aria-pressed="false">▶ Start audio</button></div><div class="tempo-control"><label for="bpm-range">Tempo</label><input id="bpm-range" type="range" min="40" max="240" step="1" /><input id="bpm-number" class="number-field" type="number" min="40" max="240" step="1" aria-label="Tempo in beats per minute" /></div><div class="beat-display" aria-label="16-step beat position"><span class="beat-label">16-step beat position / <span id="beat-readout">Starts with audio</span></span><div id="beat-grid" class="beat-grid" aria-hidden="true"></div></div></section>
         <div class="session-strip"><div class="patch-name-wrap"><label for="patch-name">Patch</label><input id="patch-name" class="text-field" type="text" maxlength="48" autocomplete="off" /></div><div class="variant-controls" aria-label="A and B comparison"><span class="shortcut">Hear variant</span><button id="variant-a" type="button">Hear A</button><button id="variant-b" type="button">Hear B</button><button id="copy-variant" type="button">Copy A → B</button></div></div><p id="status-line" class="status-line" role="status" aria-live="polite"></p>
-        <div class="workspace"><section class="graph-panel" aria-labelledby="graph-heading"><div class="panel-header"><div><h2 id="graph-heading">Signal graph</h2><p id="route-help">Select a module to inspect it.</p></div><div class="panel-actions"><button id="cable-mode" type="button" aria-pressed="false">Edit cables</button><label class="calm-control"><input id="calm-motion" type="checkbox" /> Calm motion</label></div></div><figure id="graph-stage" class="graph-stage" aria-describedby="graph-summary"><svg id="cables" class="cables" aria-hidden="true"></svg><div id="module-layer"></div><div id="graph-empty" class="graph-empty" hidden>No cables yet. Choose “Edit cables,” then pick a source and destination.</div><figcaption id="graph-summary" class="sr-only"></figcaption></figure><div class="connection-area"><h3>Connected cables <span id="connection-count"></span></h3><ul id="connection-list" class="connection-list"></ul></div></section><aside id="inspector" class="inspector" aria-labelledby="inspector-title"></aside></div>
+        <div class="workspace"><section class="graph-panel" aria-labelledby="graph-heading"><div class="panel-header"><div><h2 id="graph-heading">Signal graph</h2><p id="route-help">Select a module to inspect it.</p></div><div class="panel-actions"><button id="cable-mode" type="button" aria-pressed="false">Edit cables</button><label class="calm-control"><input id="calm-motion" type="checkbox" /> Reduce motion</label></div></div><figure id="graph-stage" class="graph-stage" aria-describedby="graph-summary"><svg id="cables" class="cables" aria-hidden="true"></svg><div id="module-layer"></div><div id="graph-empty" class="graph-empty" hidden>No cables yet. Choose “Edit cables,” then pick a source and destination.</div><figcaption id="graph-summary" class="sr-only"></figcaption></figure><div class="connection-area"><h3>Connected cables <span id="connection-count"></span></h3><ul id="connection-list" class="connection-list"></ul></div></section><aside id="inspector" class="inspector" aria-labelledby="inspector-title"></aside></div>${demoMode ? '<div class="workbench-actions demo-actions" aria-label="Patch actions"><button id="share-button" type="button">Share patch</button><button id="code-button" type="button">Copy Web Audio code</button></div>' : ''}
       </section>
       <section class="learn-strip" aria-labelledby="how-heading"><h2 id="how-heading" class="sr-only">How to use Patchboard</h2><div class="learn-step"><strong>01 / Connect modules</strong><p>Choose Edit cables, then select a source and destination. Patchboard blocks feedback loops.</p></div><div class="learn-step"><strong>02 / Follow the beat position</strong><p>Start audio. The 16-step beat position follows the same audio clock as each sound.</p></div><div class="learn-step"><strong>03 / Compare variants</strong><p>Copy A to B. Change one value or cable, then switch variants while sound runs.</p></div></section>
-      <section class="privacy-limits" aria-labelledby="limits-heading"><p class="eyebrow">Clear boundaries</p><h2 id="limits-heading">Privacy and limits</h2><p>Patchboard needs no account, upload, sample library, or microphone. It has no tracks or cloud projects.</p><p>Normal patches use this browser’s local storage. Demo changes stay only in the open tab.</p></section>
+      <section class="privacy-limits" aria-labelledby="limits-heading"><h2 id="limits-heading">Privacy and limits</h2><p>Patchboard needs no account, upload, sample library, or microphone. It has no tracks or cloud projects.</p><p>Normal patches stay in this browser. Demo changes disappear when you leave.</p></section>
     </main>${siteFooter()}
     <dialog id="share-dialog" aria-labelledby="share-title"><div class="dialog-body"><h2 id="share-title">Share this audio graph</h2><p>The link contains both A/B variants after the # character. Patchboard uploads nothing.</p><label for="share-url">Share link</label><input id="share-url" class="text-field" type="text" readonly /></div><div class="dialog-actions"><button id="copy-link" class="primary" type="button">Copy share link</button><button id="close-share" type="button">Close share dialog</button></div></dialog>
     <dialog id="code-dialog" aria-labelledby="code-title"><div class="dialog-body"><h2 id="code-title">Web Audio code for variant ${session.active}</h2><p>Paste this function into your project, then call <code>startPatch()</code> from a user action.</p><label for="code-output">Generated JavaScript</label><textarea id="code-output" class="code-output" readonly></textarea></div><div class="dialog-actions"><button id="copy-code" class="primary" type="button">Copy JavaScript</button><button id="close-code" type="button">Close code dialog</button></div></dialog>`;
@@ -218,17 +230,19 @@ function startApp(demoMode: boolean): () => void {
   byId<HTMLButtonElement>('new-button')?.addEventListener('click', () => { if (!window.confirm('Start a new patch? This replaces the saved A and B variants. Shared links you copied will still work.')) return; void engine.stop(); session = makeDefaultSession(); selectedNode = 'filter'; cableMode = false; cableSource = null; currentBeat = -1; transportButton.textContent = '▶ Start audio'; transportButton.setAttribute('aria-pressed', 'false'); cableSvg.classList.remove('running'); syncSessionUi(); renderGraph(); renderInspector(); renderBeat(); persist(); setStatus('New default patch ready.', 'success'); }, { signal });
   byId<HTMLButtonElement>('reset-demo')?.addEventListener('click', () => { void engine.stop(); session = makeDemoSession(); selectedNode = 'filter'; cableMode = false; cableSource = null; currentBeat = -1; transportButton.textContent = '▶ Start audio'; transportButton.setAttribute('aria-pressed', 'false'); cableSvg.classList.remove('running'); syncSessionUi(); renderGraph(); renderInspector(); renderBeat(); setStatus('Demo reset to the original sample.', 'success'); }, { signal });
   cableButton.addEventListener('click', () => { cableMode = !cableMode; cableSource = null; cableButton.setAttribute('aria-pressed', String(cableMode)); cableButton.textContent = cableMode ? 'Finish cables' : 'Edit cables'; routeHelp.textContent = cableMode ? 'Choose the module that sends the signal.' : 'Select a module to inspect it.'; syncModuleClasses(); setStatus(cableMode ? 'Cable editing on. Choose a source module, then a destination.' : 'Cable editing finished.', 'success'); }, { signal });
-  byId<HTMLInputElement>('calm-motion').addEventListener('change', (event) => { session.calmMotion = (event.currentTarget as HTMLInputElement).checked; document.body.classList.toggle('calm', session.calmMotion); persist(); setStatus(session.calmMotion ? 'Calm motion on. Signal movement is static.' : 'Calm motion off. Live cables move while audio runs.', 'success'); }, { signal });
+  byId<HTMLInputElement>('calm-motion').addEventListener('change', (event) => { session.calmMotion = (event.currentTarget as HTMLInputElement).checked; document.body.classList.toggle('calm', session.calmMotion); persist(); setStatus(session.calmMotion ? 'Reduced motion on. Signal movement is static.' : 'Reduced motion off. Live cables move while audio runs.', 'success'); }, { signal });
   byId<HTMLButtonElement>('variant-a').addEventListener('click', () => switchVariant('A'), { signal }); byId<HTMLButtonElement>('variant-b').addEventListener('click', () => switchVariant('B'), { signal }); byId<HTMLButtonElement>('copy-variant').addEventListener('click', () => { const target = session.active === 'A' ? 'B' : 'A'; session.variants[target] = structuredClone(patch()); persist(); setStatus(`Variant ${session.active} copied to ${target}. Switch to ${target}, then change one thing.`, 'success'); }, { signal });
   byId<HTMLButtonElement>('copy-link').addEventListener('click', async () => { try { await navigator.clipboard.writeText(shareUrl.value); setStatus('Share link copied.', 'success'); shareDialog.close(); } catch { shareUrl.focus(); shareUrl.select(); setStatus('Clipboard access was blocked. The link is selected for keyboard copying.', 'error'); } }, { signal });
   byId<HTMLButtonElement>('copy-code').addEventListener('click', async () => { try { await navigator.clipboard.writeText(codeOutput.value); setStatus('Web Audio code copied.', 'success'); codeDialog.close(); } catch { codeOutput.focus(); codeOutput.select(); setStatus('Clipboard access was blocked. The code is selected for keyboard copying.', 'error'); } }, { signal });
   byId<HTMLButtonElement>('close-share').addEventListener('click', () => shareDialog.close(), { signal }); byId<HTMLButtonElement>('close-code').addEventListener('click', () => codeDialog.close(), { signal }); [shareDialog, codeDialog].forEach((dialog) => dialog.addEventListener('click', (event) => { if (event.target === dialog) dialog.close(); }, { signal }));
   document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && cableMode && !shareDialog.open && !codeDialog.open) { cableSource = null; cableMode = false; cableButton.setAttribute('aria-pressed', 'false'); cableButton.textContent = 'Edit cables'; routeHelp.textContent = 'Select a module to inspect it.'; syncModuleClasses(); setStatus('Cable editing cancelled.'); } }, { signal });
-  const updateNetwork = (): void => byId<HTMLElement>('network-banner').classList.toggle('visible', !navigator.onLine); window.addEventListener('online', updateNetwork, { signal }); window.addEventListener('offline', updateNetwork, { signal }); updateNetwork(); const resizeObserver = new ResizeObserver(drawCables); resizeObserver.observe(stage);
+  const updateNetwork = (): void => { byId<HTMLElement>('network-banner').classList.toggle('visible', !navigator.onLine); }; window.addEventListener('online', updateNetwork, { signal }); window.addEventListener('offline', updateNetwork, { signal }); updateNetwork(); const resizeObserver = new ResizeObserver(drawCables); resizeObserver.observe(stage);
   if ('serviceWorker' in navigator) window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js').catch(() => setStatus('Offline setup did not finish. The editor still works online.', 'error')); }, { once: true, signal });
   return () => { aborter.abort(); resizeObserver.disconnect(); void engine.stop(); document.body.classList.remove('calm'); };
 }
 
+if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+saveScrollPosition();
 renderRoute();
 document.querySelector<HTMLAnchorElement>('.skip-link')?.addEventListener('click', (event) => {
   event.preventDefault();

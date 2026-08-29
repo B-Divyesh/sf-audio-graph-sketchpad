@@ -7,7 +7,7 @@ test('complete desktop workflow has no console or accessibility errors', async (
   page.on('pageerror', (error) => errors.push(error.message));
   await page.goto('/?demo=1');
   await expect(page).toHaveTitle('Demo — Patchboard');
-  await expect(page.locator('h1')).toHaveText('Hear a Web Audio graph before coding it');
+  await expect(page.locator('h1')).toHaveText('Neon steps sample patch');
   await page.getByRole('button', { name: 'Start audio' }).click();
   await expect(page.getByRole('button', { name: 'Stop audio' })).toBeVisible();
   await page.getByRole('button', { name: 'Edit cables' }).click();
@@ -48,9 +48,11 @@ test('metadata and crawl files are route-correct', async ({ page, request }) => 
   const robots = await request.get('/robots.txt'); expect(await robots.text()).toContain('Sitemap: https://audio-graph-sketchpad.sociobot.in/sitemap.xml');
 });
 
-test('shared legal routes set titles and restore focus through history', async ({ page }) => {
+test('shared legal routes restore focus and scroll position through history', async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('link', { name: 'Privacy', exact: true }).first().click();
+  await page.evaluate(() => window.scrollTo(0, 634));
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(600);
+  await page.locator('.site-nav a[href="/privacy"]').evaluate((link: HTMLAnchorElement) => link.click());
   await expect(page).toHaveURL(/\/privacy$/);
   await expect(page).toHaveTitle('Privacy — Patchboard');
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Patchboard privacy');
@@ -59,6 +61,11 @@ test('shared legal routes set titles and restore focus through history', async (
   await page.goBack();
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Hear a Web Audio graph before coding it');
   await expect(page.getByRole('heading', { level: 1 })).toBeFocused();
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(600);
+  await page.goForward();
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Patchboard privacy');
+  await expect(page.getByRole('heading', { level: 1 })).toBeFocused();
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
   await page.goto('/terms');
   await expect(page).toHaveTitle('Terms — Patchboard');
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Patchboard terms');
@@ -81,6 +88,6 @@ test('corrupt share link gives safe recovery guidance', async ({ page }) => {
 test('designed 404 route has a recovery link', async ({ page }) => {
   await page.goto('/404.html');
   await expect(page).toHaveTitle('Page not found — Patchboard');
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('This page is not connected');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Page not found.');
   await expect(page.getByRole('link', { name: 'Return to Patchboard' })).toHaveAttribute('href', '/');
 });

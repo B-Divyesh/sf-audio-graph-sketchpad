@@ -57,7 +57,7 @@ errors.length = 0;
 response = await page.goto(`${base}/definitely-missing-polish-1`, { waitUntil: 'networkidle' });
 assert(response?.status() === 404, 'unknown route did not return HTTP 404');
 assert(await page.title() === 'Page not found — Patchboard', '404 title is wrong');
-assert(await page.getByRole('heading', { level: 1 }).textContent() === 'This page is not connected', '404 page did not render');
+assert(await page.getByRole('heading', { level: 1 }).textContent() === 'Page not found.', '404 page did not render');
 await page.screenshot({ path: new URL('404-live.png', evidence).pathname, fullPage: true });
 assert(errors.every((error) => error.startsWith('Failed to load resource: the server responded with a status of 404')), `unexpected 404-page console error: ${errors.join(' | ')}`);
 errors.length = 0;
