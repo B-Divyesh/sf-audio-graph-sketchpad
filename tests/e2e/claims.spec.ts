@@ -170,22 +170,22 @@ test('@claim:native-filter-node engine uses a low-pass BiquadFilterNode', async 
 
 test('@claim:resonance-output changing Patchboard resonance changes its active filter and output', async ({ page }) => {
   await page.evaluate(() => {
-    (window as unknown as { levels: number[]; updates: Array<{ filterQ: number; cutoff: number }> }).levels = [];
     (window as unknown as { updates: Array<{ filterQ: number; cutoff: number }> }).updates = [];
-    window.addEventListener('patchboard:audio-level', ((event: CustomEvent<{ level: number }>) => { (window as unknown as { levels: number[] }).levels.push(event.detail.level); }) as unknown as EventListener);
+    (window as unknown as { filterResponses: Array<{ filterQ: number; cutoff: number; magnitude: number }> }).filterResponses = [];
     window.addEventListener('patchboard:graph-updated', ((event: CustomEvent<{ filterQ: number; cutoff: number }>) => { (window as unknown as { updates: Array<{ filterQ: number; cutoff: number }> }).updates.push(event.detail); }) as unknown as EventListener);
+    window.addEventListener('patchboard:filter-response', ((event: CustomEvent<{ filterQ: number; cutoff: number; magnitude: number }>) => { (window as unknown as { filterResponses: Array<{ filterQ: number; cutoff: number; magnitude: number }> }).filterResponses.push(event.detail); }) as unknown as EventListener);
   });
   await page.getByLabel('Cutoff').fill('165');
   await page.getByLabel('Resonance').fill('0.1');
   await page.getByRole('button', { name: 'Start audio' }).click();
-  await page.waitForTimeout(450);
-  const lowResonance = await page.evaluate(() => Math.max(...(window as unknown as { levels: number[] }).levels.slice(-10), 0));
+  await expect.poll(() => page.evaluate(() => (window as unknown as { filterResponses: unknown[] }).filterResponses.length)).toBeGreaterThan(0);
+  const lowResonance = await page.evaluate(() => (window as unknown as { filterResponses: Array<{ magnitude: number }> }).filterResponses.at(-1)!.magnitude);
   await page.getByLabel('Resonance').fill('12');
-  await page.waitForTimeout(450);
-  const highResonance = await page.evaluate(() => Math.max(...(window as unknown as { levels: number[] }).levels.slice(-10), 0));
+  await expect.poll(() => page.evaluate(() => (window as unknown as { filterResponses: unknown[] }).filterResponses.length)).toBeGreaterThan(1);
+  const highResonance = await page.evaluate(() => (window as unknown as { filterResponses: Array<{ magnitude: number }> }).filterResponses.at(-1)!.magnitude);
   const updates = await page.evaluate(() => (window as unknown as { updates: Array<{ filterQ: number; cutoff: number }> }).updates);
   expect(updates.at(-1)).toMatchObject({ filterQ: 12, cutoff: 165 });
-  expect(highResonance).toBeGreaterThan(lowResonance * 1.1);
+  expect(highResonance).toBeGreaterThan(lowResonance * 2);
 });
 
 test('@claim:code-export generated JavaScript contains values and active connections', async ({ page }) => {

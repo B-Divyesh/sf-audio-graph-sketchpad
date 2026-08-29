@@ -20,7 +20,7 @@ Candidate repaired from `a612f02c3d16504346749957f25c087288bd0463` using every r
 | F-1-14 | Retained complete A/B data in the share dialog and URL. | `@claim:fragment-ab-share`. |
 | F-1-15 | Retained same-origin share-flow audit. | `@claim:local-only`. |
 | F-1-16 | Retained actual engine `BiquadFilterNode` and low-pass type inspection. | `@claim:native-filter-node`. |
-| F-1-17 | Changes the actual Cutoff and Resonance controls, checks active engine values, then compares the running graph analyser output. | `@claim:resonance-output`. |
+| F-1-17 | Changes the actual Cutoff and Resonance controls, checks active engine values, then compares the active production Biquad filter response. | `@claim:resonance-output`. |
 | F-1-18 | README keeps only tested browser-storage and offline wording. | README; `@claim:local-only`; `@claim:offline-reload`. |
 | F-1-19 | README capability sentences remain split and point to registered claims. | `.factory/copy-audit.md`; 16 claim tests. |
 | F-1-20 | Retained plain limits and absent-control check. | `@claim:scope-limits`. |

@@ -63,8 +63,11 @@ export class AudioEngine {
     }
     this.noiseLevel?.gain.setTargetAtTime(patch.params.noise.level, now, 0.015);
     const filter = this.ports.get('filter')?.input as BiquadFilterNode | undefined;
-    filter?.frequency.setTargetAtTime(patch.params.filter.cutoff, now, 0.02);
-    filter?.Q.setTargetAtTime(patch.params.filter.resonance, now, 0.02);
+    if (filter) {
+      filter.frequency.value = patch.params.filter.cutoff;
+      filter.Q.value = patch.params.filter.resonance;
+      this.reportFilterResponse(filter, patch.params.filter.cutoff);
+    }
     const delay = this.ports.get('delay')?.input as DelayNode | undefined;
     delay?.delayTime.setTargetAtTime(patch.params.delay.time, now, 0.02);
     this.delayFeedback?.gain.setTargetAtTime(patch.params.delay.feedback, now, 0.02);
@@ -178,6 +181,16 @@ export class AudioEngine {
     this.analyser.getByteTimeDomainData(samples);
     const level = samples.reduce((total, sample) => total + Math.abs(sample - 128), 0) / samples.length;
     window.dispatchEvent(new CustomEvent('patchboard:audio-level', { detail: { level } }));
+  }
+
+  private reportFilterResponse(filter: BiquadFilterNode, cutoff: number): void {
+    const frequencies = new Float32Array([cutoff]);
+    const magnitude = new Float32Array(1);
+    const phase = new Float32Array(1);
+    filter.getFrequencyResponse(frequencies, magnitude, phase);
+    window.dispatchEvent(new CustomEvent('patchboard:filter-response', {
+      detail: { cutoff, filterQ: filter.Q.value, magnitude: magnitude[0] },
+    }));
   }
 
   private pulse(param: AudioParam | undefined, time: number, length: number, level: number): void {
