@@ -30,8 +30,18 @@ npm run preview
 
 Open `http://127.0.0.1:4173/?demo=1` for the isolated sample. See `.factory/demo.md` for reset and storage behavior.
 
-## Deployment and follow-up
+## Deployment and live re-check
 
-Push `main` to trigger the configured static deployment. After propagation, run `npm run verify:live` and cold-check `/`, `/?demo=1`, `/privacy`, `/terms`, and an unknown URL. The live result and deployed commit are appended below after that check.
+Deployed with `/opt/fleet/lib/deploy-static.sh audio-graph-sketchpad dist`. Azure deployment `5745589b-b5e0-461e-bf17-328e4ea91c45` completed successfully to the existing Static Web App and custom domain.
+
+`npm run verify:live` passed against `https://audio-graph-sketchpad.sociobot.in` after deployment:
+
+```json
+{"routes":5,"unknownStatus":404,"axeSeriousCritical":0,"consoleErrors":0,"externalRequests":0,"mobileOverflow":false,"offlineReload":true}
+```
+
+Fresh cold live contexts rechecked `/`, `/?demo=1`, `/demo`, `/privacy`, `/terms`, `/404.html`, and an unknown URL. The live demo contains the new direct workbench rather than the repeated hero; reset/exit isolation, 404 wording, route focus/scroll, metadata, accessibility, privacy requests, and offline reload all passed. Live captures are `.factory/evidence/live-cold/demo-desktop.png`, `.factory/evidence/live-cold/demo-mobile.png`, and `.factory/evidence/live-cold/404-live.png`.
+
+All 16 individual commands from `.factory/claims.json` were also run separately from the clean clone; `/tmp/patchboard-individual-claims.log` records 16 commands and 16 one-test passes.
 
 Known product gaps: none. No runtime AI feature is appropriate; code export is deterministic and tested.

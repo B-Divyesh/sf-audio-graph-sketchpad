@@ -1,6 +1,6 @@
 # Polish round 2 — zero-finding repair map
 
-Candidate repaired from `a612f02c3d16504346749957f25c087288bd0463` using every review finding. Local evidence is in `.factory/evidence/polish-2-demo-mobile.png`, `.factory/evidence/polish-2-root-desktop.png`, and `.factory/evidence/polish-2-404.png`. The final deployed URL check is recorded in the handoff.
+Candidate repaired from `a612f02c3d16504346749957f25c087288bd0463` using every review finding. Local evidence is in `.factory/evidence/polish-2-demo-mobile.png`, `.factory/evidence/polish-2-root-desktop.png`, and `.factory/evidence/polish-2-404.png`. Cold live evidence is `.factory/evidence/live-cold/demo-desktop.png`, `.factory/evidence/live-cold/demo-mobile.png`, and `.factory/evidence/live-cold/404-live.png` at `https://audio-graph-sketchpad.sociobot.in`.
 
 | Finding | Change made | Evidence |
 | --- | --- | --- |
@@ -62,3 +62,5 @@ Candidate repaired from `a612f02c3d16504346749957f25c087288bd0463` using every r
 | F-2-13 | Replaced the metaphor H1 with “Page not found.” | 404 browser test; `polish-2-404.png`. |
 
 No AI runtime feature was added: deterministic graph-to-code export is the useful, testable handoff for this local browser tool.
+
+Every row above was rechecked in a fresh live browser context after Azure deployment. `npm run verify:live` passed five routes, HTTP 404, zero serious/critical axe findings, zero console errors, zero external requests, no mobile overflow, and an offline demo reload.
