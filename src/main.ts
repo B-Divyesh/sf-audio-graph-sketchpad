@@ -60,7 +60,7 @@ function renderLegal(route: '/privacy' | '/terms'): void {
 }
 
 function renderNotFound(): void {
-  app.innerHTML = `${siteHeader()}<main id="main" class="not-found" tabindex="-1"><p class="brand-kicker">PATCH LOST / 404</p><h1>Page not found.</h1><p>The address does not match a Patchboard page.</p><a class="button-link primary" href="/" data-route>Return to Patchboard</a></main>${siteFooter()}`;
+  app.innerHTML = `${siteHeader()}<main id="main" class="not-found" tabindex="-1"><p class="brand-kicker">404 error</p><h1>Page not found.</h1><p>The address does not match a Patchboard page.</p><a class="button-link primary" href="/" data-route>Return to Patchboard</a></main>${siteFooter()}`;
 }
 
 function renderRoute(options: { moveFocus?: boolean; scrollPosition?: number } = {}): void {
@@ -219,7 +219,7 @@ function startApp(demoMode: boolean): () => void {
     const wrap = document.createElement('div'); wrap.className = 'control-row'; const id = `control-${selectedNode}-wave`; const label = document.createElement('label'); label.htmlFor = id; label.textContent = labelText; const select = document.createElement('select'); select.id = id; select.className = 'wide-control'; values.forEach((value) => { const option = document.createElement('option'); option.value = value; option.textContent = value[0].toUpperCase() + value.slice(1); option.selected = value === initial; select.append(option); }); select.addEventListener('change', () => onChange(select.value), { signal }); wrap.append(label, select); return wrap;
   }
   function inspectorNote(id: NodeId): string {
-    return { osc: 'This browser oscillator sets the pitched signal.', noise: 'Patchboard generates white noise in this browser. Lower its level before mixing it with the oscillator.', filter: 'This browser low-pass filter removes sound above the cutoff. Resonance emphasizes sound near the cutoff.', delay: 'Set the repeat time and feedback amount here.', gain: 'Set the level for signals that pass through this module.', speaker: 'Set the final output level here.' }[id];
+    return { osc: 'This browser oscillator sets the pitched signal.', noise: 'Patchboard generates noise in this browser. Lower its level before mixing it with the oscillator.', filter: 'This browser low-pass filter removes sound above the cutoff. Resonance emphasizes sound near the cutoff.', delay: 'Set the repeat time and feedback amount here.', gain: 'Set the level for signals that pass through this module.', speaker: 'Set the final output level here.' }[id];
   }
   function renderBeat(): void { Array.from(byId<HTMLDivElement>('beat-grid').children).forEach((dot, index) => dot.classList.toggle('active', index === currentBeat)); byId<HTMLElement>('beat-readout').textContent = currentBeat < 0 ? 'Starts with audio' : `step ${currentBeat + 1} / 16`; }
   function changeBpm(raw: string): void { const value = Math.max(40, Math.min(240, Math.round(Number(raw) || patch().bpm))); patch().bpm = value; bpmRange.value = String(value); bpmNumber.value = String(value); engine.update(patch()); persist(); setStatus(`Tempo set to ${value} BPM in variant ${session.active}.`, 'success'); }
