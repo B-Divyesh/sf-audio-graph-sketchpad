@@ -52,7 +52,7 @@ function renderLegal(route: '/privacy' | '/terms'): void {
   const privacy = route === '/privacy';
   app.innerHTML = `${siteHeader()}<main id="main" class="legal-page" tabindex="-1"><p class="brand-kicker">Patchboard / ${privacy ? 'privacy' : 'terms'}</p><h1>${privacy ? 'Patchboard privacy' : 'Patchboard terms'}</h1>${privacy ? `
     <h2>What this browser stores</h2><p>Normal mode stores your A/B patch, motion preference, and edit count in local storage.</p><p>Demo mode uses memory only. It never reads or changes your normal patch.</p>
-    <h2>What leaves this browser</h2><p>Editing sends no patch or audio data elsewhere. Patchboard does not use cookies or analytics.</p><p>Patchboard never requests microphone access.</p><p>A share link keeps patch data after the # character. Browsers do not include that fragment in a server request.</p>
+    <h2>What leaves this browser</h2><p>Editing sends no patch or audio data elsewhere. Patchboard does not use cookies or analytics.</p><p>Patchboard never requests microphone access.</p><p>A share link keeps patch data after the # character. Browsers do not include that part in a server request.</p>
       <h2>Remove your data</h2><p>Select “Start new patch” or clear this site’s storage.</p>` : `
     <h2>Using Patchboard</h2><p>Patchboard is a free educational tool provided “as is.” Use it to learn, sketch, and share synthesized audio graphs.</p>
     <h2>Your patches</h2><p>You keep all rights to patch settings you create. Anyone with your share link can read its embedded patch.</p>

@@ -1,32 +1,154 @@
-# Copy audit — polish round 2
+# Copy audit — polish round 3
 
-Reviewed 29 August 2026. Counts treat hyphenated words, A/B, and URLs as one word. All authored landing, demo, dialog, error, offline, README, and legal-route sentences are at most 22 words. No banned marketing words appear in visitor-facing copy.
+Reviewed 29 August 2026. Counts treat hyphenated terms, A/B, URLs, and dynamic names or numbers as one word. Visitor-facing source, rendered routes, dialogs, status/error text, README, and the catalog line were checked. No sentence exceeds 22 words. No banned marketing word appears.
 
-## Landing and demo copy
+## First screen
 
 | Words | Copy |
 | ---: | --- |
+| 7 | Audio and patches stay in this browser. |
 | 8 | Hear a Web Audio graph before coding it. |
 | 12 | For creative coders learning how six browser audio modules affect one another. |
+| 5 | Try it with sample data. |
 | 7 | Loads a ready-to-hear patch; nothing is saved. |
+| 3 | Build your patch. |
 | 1 | Free. |
 | 6 | Works offline after your first visit. |
 | 5 | Patches stay in this browser. |
-| 6 | Patchboard makes sound in this browser. |
-| 6 | It uses no samples or microphone. |
-| 8 | A share link can carry both A/B variants. |
+
+The H1 is eight words and names the job. The next sentence names creative coders and the learning situation. The sample action is dominant, explains its result, and is followed by three tested facts.
+
+## Product, demo, dialogs, and offline copy
+
+| Words | Copy |
+| ---: | --- |
+| 7 | Demo — sample data, nothing is saved. |
 | 5 | Neon steps sample patch. |
 | 8 | 920 Hz cutoff · 240 ms delay · 4 cables. |
 | 5 | Oscillator → Filter → Delay → Gain → Speaker. |
-| 7 | Demo — sample data, nothing is saved. |
+| 6 | Build and hear a six-module graph. |
+| 8 | Connect modules, start audio, then compare one change. |
+| 6 | Patchboard makes sound in this browser. |
+| 6 | It uses no samples or microphone. |
+| 8 | A share link can carry both A/B variants. |
+| 2 | You’re offline. |
+| 6 | Cached Patchboard tools and patches remain available. |
+| 3 | Audio is off. |
+| 8 | Press Start audio when you are ready. |
+| 6 | Select a module to inspect it. |
+| 3 | No cables yet. |
+| 9 | Choose “Edit cables,” then pick a source and destination. |
 | 9 | Choose Edit cables, then select a source and destination. |
+| 4 | Patchboard blocks feedback loops. |
+| 2 | Start audio. |
 | 12 | The 16-step beat position follows the same audio clock as each sound. |
+| 4 | Copy A to B. |
+| 11 | Change one value or cable, then switch variants while sound runs. |
 | 9 | Patchboard needs no account, upload, sample library, or microphone. |
-| 7 | It has no tracks or cloud projects. |
-| 10 | Normal patches stay in this browser. Demo changes disappear when you leave. |
-| 3 | Page not found. |
+| 6 | It has no tracks or cloud projects. |
+| 6 | Normal patches stay in this browser. |
+| 5 | Demo changes disappear when you leave. |
+| 10 | Build and hear small Web Audio graphs in your browser. |
+| 9 | The link contains both A/B variants after the # character. |
+| 3 | Patchboard uploads nothing. |
+| 15 | Paste this function into your project, then call `startPatch()` from a user action. |
+| 7 | Patchboard generates noise in this browser. |
+| 9 | Lower its level before mixing it with the oscillator. |
+| 9 | This browser low-pass filter removes sound above the cutoff. |
+| 6 | Resonance emphasizes sound near the cutoff. |
+| 12 | Six connected modules show the kind of audio graph you can build. |
+| 11 | Patchboard needs JavaScript to synthesize and route audio in your browser. |
 
-## README copy
+## Feedback, errors, and confirmations
+
+Dynamic patch names, module names, variants, BPM values, and cable counts each occupy one placeholder below.
+
+| Words | Copy |
+| ---: | --- |
+| 5 | Shared patch “[name]” loaded. |
+| 6 | Press Start audio to hear it. |
+| 10 | This share link does not contain a compatible Patchboard session. |
+| 9 | A fresh patch is ready to edit and share. |
+| 4 | Local saving is unavailable. |
+| 11 | You can still build and share a patch in this tab. |
+| 7 | Demo changes stay in this tab only. |
+| 5 | “[name]” saved in this browser. |
+| 6 | This browser blocked local saving. |
+| 7 | Use Share patch to keep a link. |
+| 2 | [Module] selected. |
+| 8 | Change a value to hear it immediately. |
+| 5 | Speaker is the final output. |
+| 8 | Choose a module that can send a signal. |
+| 4 | Now choose a destination. |
+| 6 | [Module] is the cable source. |
+| 4 | Choose a destination. |
+| 6 | A module cannot feed itself. |
+| 9 | Speaker is the final output and cannot send a cable. |
+| 9 | [Module] is a sound source and cannot receive a cable. |
+| 4 | That cable already exists. |
+| 7 | That cable would create a feedback loop. |
+| 2 | Cable added. |
+| 7 | Choose another source, or finish editing. |
+| 4 | Cable [source] → [destination] connected. |
+| 4 | Cable [source] → [destination] removed. |
+| 5 | Reconnect it to undo. |
+| 6 | The graph has no connected cables. |
+| 5 | [Module] updated in variant [A/B]. |
+| 7 | Tempo set to [number] BPM in variant [A/B]. |
+| 3 | Audio stopped. |
+| 5 | Your patch is still here. |
+| 6 | Audio running at [number] BPM. |
+| 10 | Change one value or switch variants to compare. |
+| 5 | Audio could not start. |
+| 6 | Check this tab’s sound permission. |
+| 4 | Variant [A/B] is live. |
+| 5 | [number] cables at [number] BPM. |
+| 2 | Sample ready. |
+| 10 | Press Start audio, then switch between Hear A and Hear B. |
+| 4 | Start a new patch? |
+| 10 | This replaces the saved A and B variants. |
+| 7 | Shared links you copied will still work. |
+| 4 | New default patch ready. |
+| 6 | Demo reset to the original sample. |
+| 3 | Cable editing on. |
+| 8 | Choose a source module, then a destination. |
+| 3 | Cable editing finished. |
+| 6 | Reduced motion on. Signal movement is static. |
+| 8 | Reduced motion off. Live cables move while audio runs. |
+| 8 | Variant [A/B] copied to [A/B]. Switch to [A/B], then change one thing. |
+| 4 | Share link copied. |
+| 4 | Web Audio code copied. |
+| 5 | Clipboard access was blocked. |
+| 8 | The link is selected for keyboard copying. |
+| 8 | The code is selected for keyboard copying. |
+| 4 | Cable editing cancelled. |
+| 6 | Offline setup did not finish. |
+| 5 | The editor still works online. |
+
+## Legal and 404 routes
+
+| Words | Copy |
+| ---: | --- |
+| 14 | Normal mode stores your A/B patch, motion preference, and edit count in local storage. |
+| 5 | Demo mode uses memory only. |
+| 8 | It never reads or changes your normal patch. |
+| 8 | Editing sends no patch or audio data elsewhere. |
+| 7 | Patchboard does not use cookies or analytics. |
+| 5 | Patchboard never requests microphone access. |
+| 9 | A share link keeps patch data after the # character. |
+| 10 | Browsers do not include that part in a server request. |
+| 9 | Select “Start new patch” or clear this site’s storage. |
+| 9 | Patchboard is a free educational tool provided “as is.” |
+| 10 | Use it to learn, sketch, and share synthesized audio graphs. |
+| 9 | You keep all rights to patch settings you create. |
+| 10 | Anyone with your share link can read its embedded patch. |
+| 6 | Browser audio behavior varies by device. |
+| 11 | Patchboard offers no warranty for uninterrupted use or a live performance. |
+| 4 | Effective 28 August 2026. |
+| 3 | Page not found. |
+| 8 | The address does not match a Patchboard page. |
+
+## README and catalog
 
 | Words | Copy |
 | ---: | --- |
@@ -37,12 +159,16 @@ Reviewed 29 August 2026. Counts treat hyphenated words, A/B, and URLs as one wor
 | 15 | Use it to understand a small graph before adding it to a performance or app. |
 | 7 | This is not recording or music-production software. |
 | 13 | It has no tracks, cloud projects, account, upload, sample library, or microphone control. |
+| 12 | Generates audio in the browser and starts it only after your click. |
 | 13 | Blocks graph feedback loops and shows the 16-step beat position from the audio clock. |
-| 10 | Stores normal patches in this browser. Demo changes disappear when you leave. |
-| 13 | Restores two variants from a share link. Browsers do not send the part after # to the server. |
-| 7 | Is free and needs no account. |
-| 11 | Deploy the generated dist/ directory as an Azure Static Web App. |
-| 12 | Read how the visual system and artwork were made in .factory/design.md. |
+| 6 | Stores normal patches in this browser. |
+| 5 | Demo changes disappear when you leave. |
+| 7 | Restores two variants from a share link. |
+| 10 | Browsers do not send the part after # to the server. |
+| 8 | Generates Web Audio JavaScript for the active variant. |
+| 6 | Works offline after the first visit. |
+| 6 | Is free and needs no account. |
+| 15 | Build, hear, and export a six-module Web Audio graph before adding it to your code. |
 
 ## Terminology
 
@@ -55,3 +181,5 @@ Reviewed 29 August 2026. Counts treat hyphenated words, A/B, and URLs as one wor
 | Timing display | 16-step beat position |
 | Alternate sound | variant |
 | One connection / topology | cable / graph |
+
+The 404 label is the literal “404 error.” Previously flagged jargon and decorative marketing labels are absent from visitor-facing copy.
