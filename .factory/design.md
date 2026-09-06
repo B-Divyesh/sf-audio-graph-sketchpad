@@ -27,7 +27,7 @@ Color never works alone: live/dormant connections differ by line style and anima
 
 No font files or third-party requests. Headings, numbers, node labels, and controls use the platform monospace stack (`ui-monospace, SFMono-Regular, Consolas, Liberation Mono, monospace`) for the tracker character. Explanations use the platform UI stack (`Inter` where installed, system-ui, sans-serif) for reading comfort. Body copy is never below 16px. Type steps are 12px metadata, 16px body, 20px section, 28px title, and a fluid 40–64px display wordmark.
 
-The spacing base is 4px, with primary intervals of 8, 12, 16, 24, 32, and 48px. Controls are at least 44px tall and adjacent actions have at least 8px of air. Desktop uses a wide graph plus a 296px inspector; at 390px the inspector stacks under the graph, transport actions wrap, and nonessential keyboard-hint copy disappears.
+The spacing base is 4px, with primary intervals of 8, 12, 16, 24, 32, and 48px. Controls and link hit areas are at least 44px in both dimensions, and adjacent actions have at least 8px of air. Desktop uses a wide graph plus a 296px inspector; at 390px the inspector stacks under the graph, the header and transport reflow into rows, and nonessential keyboard-hint copy disappears. The same layout reflows without horizontal panning when text is enlarged to 200%.
 
 ## Interaction grammar
 

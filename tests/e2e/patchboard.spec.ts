@@ -18,7 +18,7 @@ test('complete desktop workflow has no console or accessibility errors', async (
   await expect(page.getByRole('dialog', { name: /Web Audio code/ })).toBeVisible();
   await page.getByRole('button', { name: 'Close code dialog' }).click();
   const results = await new AxeBuilder({ page: page as never }).analyze();
-  expect(results.violations.filter((violation) => ['serious', 'critical'].includes(violation.impact ?? ''))).toEqual([]);
+  expect(results.violations).toEqual([]);
   expect(errors).toEqual([]);
 });
 
@@ -33,6 +33,16 @@ test('mobile first screen fits and keeps the sample action visible', async ({ pa
   await expect(page.getByText('Free.', { exact: true })).toBeVisible();
   await expect(page.getByText('Works offline after your first visit.', { exact: true })).toBeVisible();
   await expect(page.getByText('Patches stay in this browser.', { exact: true })).toBeVisible();
+  for (const locator of [
+    page.getByRole('heading', { level: 1 }),
+    page.getByText('For creative coders learning how six browser audio modules affect one another.'),
+    page.getByRole('link', { name: 'Try it with sample data' }),
+    page.locator('.plain-facts'),
+  ]) {
+    const box = await locator.boundingBox();
+    expect(box, 'first-screen content must render').not.toBeNull();
+    expect(box!.y + box!.height, 'job, audience, first action, and facts must fit before scrolling').toBeLessThanOrEqual(844);
+  }
 });
 
 test('first-screen sample action enters the isolated demo in one click', async ({ page }, testInfo) => {
@@ -61,7 +71,7 @@ test('first-screen sample action enters the isolated demo in one click', async (
 test('metadata and crawl files are route-correct', async ({ page, request }) => {
   for (const [route, title] of [['/', 'Patchboard — hear a Web Audio graph'], ['/demo', 'Demo — Patchboard'], ['/privacy', 'Privacy — Patchboard'], ['/terms', 'Terms — Patchboard'], ['/404.html', 'Page not found — Patchboard']] as const) {
     await page.goto(route); await expect(page).toHaveTitle(title); await expect(page.locator('h1')).toHaveCount(1); await expect(page.locator('main')).toHaveCount(1); await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', /^https:\/\/audio-graph-sketchpad\.sociobot\.in\//); await expect(page.locator('meta[property="og:image"]')).toHaveAttribute('content', /patchboard-social\.png$/);
-    const axe = await new AxeBuilder({ page: page as never }).analyze(); expect(axe.violations.filter((violation) => ['serious', 'critical'].includes(violation.impact ?? ''))).toEqual([]);
+    const axe = await new AxeBuilder({ page: page as never }).analyze(); expect(axe.violations).toEqual([]);
   }
   const sitemap = await request.get('/sitemap.xml'); expect(sitemap.ok()).toBe(true); expect(sitemap.headers()['content-type']).toContain('xml'); expect(await sitemap.text()).toContain('/demo');
   const robots = await request.get('/robots.txt'); expect(await robots.text()).toContain('Sitemap: https://audio-graph-sketchpad.sociobot.in/sitemap.xml');
@@ -109,4 +119,49 @@ test('designed 404 route has a recovery link', async ({ page }) => {
   await expect(page).toHaveTitle('Page not found — Patchboard');
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Page not found.');
   await expect(page.getByRole('link', { name: 'Return to Patchboard' })).toHaveAttribute('href', '/');
+});
+
+test('mobile routes reflow at 200 percent text without clipped controls', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'mobile');
+  for (const route of ['/', '/?demo=1', '/privacy', '/terms', '/404.html']) {
+    await page.goto(route);
+    await page.evaluate(() => { document.documentElement.style.fontSize = '200%'; });
+
+    const layout = await page.evaluate(() => {
+      const viewport = document.documentElement.clientWidth;
+      const visibleControls = [...document.querySelectorAll<HTMLElement>('a, button, input, select, textarea')]
+        .filter((element) => {
+          const style = getComputedStyle(element);
+          const rect = element.getBoundingClientRect();
+          return style.visibility !== 'hidden' && style.display !== 'none' && rect.width > 0 && rect.height > 0;
+        });
+      return {
+        scrollWidth: document.documentElement.scrollWidth,
+        viewport,
+        clipped: visibleControls
+          .map((element) => ({ name: element.getAttribute('aria-label') || element.textContent?.trim() || element.id, rect: element.getBoundingClientRect().toJSON() }))
+          .filter(({ rect }) => rect.left < -0.5 || rect.right > viewport + 0.5),
+      };
+    });
+
+    expect(layout.scrollWidth, `${route} must not require horizontal panning`).toBeLessThanOrEqual(layout.viewport);
+    expect(layout.clipped, `${route} must keep every visible control in the viewport`).toEqual([]);
+  }
+});
+
+test('mobile interactive targets provide at least a 44 pixel hit area', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'mobile');
+  for (const route of ['/', '/?demo=1', '/privacy', '/terms', '/404.html']) {
+    await page.goto(route);
+    const undersized = await page.evaluate(() => {
+      const targets = [...document.querySelectorAll<HTMLElement>('a, button, input:not([type="checkbox"]), select, textarea, label:has(input[type="checkbox"])')];
+      return targets.flatMap((element) => {
+        const style = getComputedStyle(element);
+        const box = element.getBoundingClientRect();
+        if (style.visibility === 'hidden' || style.display === 'none' || box.width === 0 || box.height === 0) return [];
+        return box.width >= 44 && box.height >= 44 ? [] : [{ name: element.getAttribute('aria-label') || element.textContent?.trim() || element.id, width: box.width, height: box.height }];
+      });
+    });
+    expect(undersized, `${route} has undersized touch targets`).toEqual([]);
+  }
 });
