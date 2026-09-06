@@ -1,6 +1,6 @@
-# Copy audit — polish round 3
+# Copy audit — repair 2
 
-Reviewed 29 August 2026. Counts treat hyphenated terms, A/B, URLs, and dynamic names or numbers as one word. Visitor-facing source, rendered routes, dialogs, status/error text, README, and the catalog line were checked. No sentence exceeds 22 words. No banned marketing word appears.
+Reviewed 6 September 2026. Counts treat hyphenated terms, A/B, URLs, and dynamic names or numbers as one word. Visitor-facing source, rendered routes, dialogs, status/error text, README, and the catalog line were checked. No sentence exceeds 22 words. No banned marketing word appears.
 
 ## First screen
 
